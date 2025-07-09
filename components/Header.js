@@ -3,7 +3,7 @@ import { View, Text } from "react-native";
 import { useApp } from "../context/AppContext";
 import { styles } from "../styles/ComponentStyles";
 
-export const Header = ({ title }) => {
+export const Header = ({ title, onNavigate }) => {
   const { userQueue } = useApp();
 
   return (

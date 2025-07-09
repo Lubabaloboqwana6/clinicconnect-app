@@ -1,3 +1,4 @@
+// screens/QueueScreen.js - Queue screen component
 import React from "react";
 import { ScrollView, View, Text, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -5,7 +6,7 @@ import { Header } from "../components/Header";
 import { useApp } from "../context/AppContext";
 import { styles } from "../styles/ScreenStyles";
 
-export const QueueScreen = ({ onShowQueueModal }) => {
+export const QueueScreen = ({ onShowQueueModal, onNavigate }) => {
   const { userQueue, setUserQueue, setQueueFormData, setSelectedQueueClinic } =
     useApp();
 
@@ -63,14 +64,14 @@ export const QueueScreen = ({ onShowQueueModal }) => {
               </Text>
             </View>
             <View style={styles.personalDetailRow}>
-              <Ionicons name="card" size={16} color="#2E8B57" />
+              <Ionicons name="card-outline" size={16} color="#2E8B57" />
               <Text style={styles.personalDetailLabel}>ID Number:</Text>
               <Text style={styles.personalDetailValue}>
                 {userQueue.userDetails?.idNumber}
               </Text>
             </View>
             <View style={styles.personalDetailRow}>
-              <Ionicons name="call" size={16} color="#2E8B57" />
+              <Ionicons name="call-outline" size={16} color="#2E8B57" />
               <Text style={styles.personalDetailLabel}>Phone:</Text>
               <Text style={styles.personalDetailValue}>
                 {userQueue.userDetails?.phoneNumber}
@@ -110,7 +111,7 @@ export const QueueScreen = ({ onShowQueueModal }) => {
               style={styles.updateDetailsBtn}
               onPress={handleUpdateDetails}
             >
-              <Ionicons name="create" size={16} color="#fff" />
+              <Ionicons name="create-outline" size={16} color="#fff" />
               <Text style={styles.updateDetailsText}>Update Details</Text>
             </TouchableOpacity>
 
@@ -118,7 +119,7 @@ export const QueueScreen = ({ onShowQueueModal }) => {
               style={styles.leaveQueueBtn}
               onPress={handleLeaveQueue}
             >
-              <Ionicons name="exit" size={16} color="#fff" />
+              <Ionicons name="exit-outline" size={16} color="#fff" />
               <Text style={styles.leaveQueueText}>Leave Queue</Text>
             </TouchableOpacity>
           </View>

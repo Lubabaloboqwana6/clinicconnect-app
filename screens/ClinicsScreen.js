@@ -1,3 +1,4 @@
+// screens/ClinicsScreen.js - Clinics screen component
 import React from "react";
 import { ScrollView, View, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +8,7 @@ import { useApp } from "../context/AppContext";
 import { mockClinics } from "../data/mockData";
 import { styles } from "../styles/ScreenStyles";
 
-export const ClinicsScreen = ({ onShowBookingModal, onShowQueueModal }) => {
+export const ClinicsScreen = ({ onShowBookingModal, onShowQueueModal, onNavigate }) => {
   const {
     searchQuery,
     setSearchQuery,
@@ -34,7 +35,7 @@ export const ClinicsScreen = ({ onShowBookingModal, onShowQueueModal }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <Header title="Find Clinics" />
+      <Header title="Find Clinics" onNavigate={onNavigate} />
 
       <View style={styles.searchContainer}>
         <TextInput

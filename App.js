@@ -23,6 +23,7 @@ const App = () => {
       case "clinics":
         return (
           <ClinicsScreen
+            onNavigate={setCurrentScreen}
             onShowBookingModal={() => setShowBookingModal(true)}
             onShowQueueModal={() => setShowQueueModal(true)}
           />
@@ -32,7 +33,12 @@ const App = () => {
       case "appointments":
         return <AppointmentsScreen onNavigate={setCurrentScreen} />;
       case "queue":
-        return <QueueScreen onShowQueueModal={() => setShowQueueModal(true)} />;
+        return (
+          <QueueScreen
+            onNavigate={setCurrentScreen}
+            onShowQueueModal={() => setShowQueueModal(true)}
+          />
+        );
       default:
         return <HomeScreen onNavigate={setCurrentScreen} />;
     }
