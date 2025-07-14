@@ -1,4 +1,4 @@
-// context/AppContext.js - Global state management
+// context/AppContext.js - Remove symptom-related state
 import React, { createContext, useContext, useState } from "react";
 
 const AppContext = createContext();
@@ -16,8 +16,6 @@ export const AppProvider = ({ children }) => {
   const [appointments, setAppointments] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
-  const [symptomDescription, setSymptomDescription] = useState("");
   const [selectedQueueClinic, setSelectedQueueClinic] = useState(null);
   const [queueFormData, setQueueFormData] = useState({
     name: "",
@@ -29,6 +27,7 @@ export const AppProvider = ({ children }) => {
     time: "",
     service: "",
   });
+  // REMOVED: selectedSymptoms, setSelectedSymptoms, symptomDescription, setSymptomDescription
 
   const value = {
     userQueue,
@@ -39,16 +38,13 @@ export const AppProvider = ({ children }) => {
     setSelectedClinic,
     searchQuery,
     setSearchQuery,
-    selectedSymptoms,
-    setSelectedSymptoms,
-    symptomDescription,
-    setSymptomDescription,
     selectedQueueClinic,
     setSelectedQueueClinic,
     queueFormData,
     setQueueFormData,
     bookingFormData,
     setBookingFormData,
+    // REMOVED: selectedSymptoms, setSelectedSymptoms, symptomDescription, setSymptomDescription
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

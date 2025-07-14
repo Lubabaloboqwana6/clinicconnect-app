@@ -1,4 +1,4 @@
-// utils/helpers.js - Utility functions
+// utils/helpers.js - Enhanced utility functions with consistent styling
 export const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-ZA", {
@@ -17,28 +17,35 @@ export const formatTime = (timeString) => {
 };
 
 export const validateIdNumber = (idNumber) => {
-  // Basic South African ID number validation
   if (!idNumber || idNumber.length !== 13) {
-    return false;
+    return { isValid: false, message: "ID number must be 13 digits" };
   }
 
-  // Check if all characters are digits
-  return /^\d{13}$/.test(idNumber);
+  if (!/^\d{13}$/.test(idNumber)) {
+    return { isValid: false, message: "ID number must contain only numbers" };
+  }
+
+  return { isValid: true, message: "" };
 };
 
 export const validatePhoneNumber = (phoneNumber) => {
-  // Basic South African phone number validation
-  if (!phoneNumber) return false;
+  if (!phoneNumber) {
+    return { isValid: false, message: "Phone number is required" };
+  }
 
-  // Remove spaces and special characters
   const cleaned = phoneNumber.replace(/[\s\-\(\)]/g, "");
 
-  // Check if it's a valid SA number (10 digits starting with 0, or 11 digits starting with 27)
-  return /^0\d{9}$/.test(cleaned) || /^27\d{9}$/.test(cleaned);
+  if (!/^(0\d{9}|27\d{9}|\+27\d{9})$/.test(cleaned)) {
+    return {
+      isValid: false,
+      message: "Please enter a valid South African phone number",
+    };
+  }
+
+  return { isValid: true, message: "" };
 };
 
 export const formatPhoneNumber = (phoneNumber) => {
-  // Format phone number for display
   const cleaned = phoneNumber.replace(/[\s\-\(\)]/g, "");
 
   if (cleaned.length === 10) {
@@ -52,8 +59,7 @@ export const calculateEstimatedTime = (
   currentQueue,
   avgTimePerPatient = 15
 ) => {
-  // Calculate estimated wait time based on queue position
-  return currentQueue * avgTimePerPatient;
+  return Math.max(currentQueue * avgTimePerPatient, 5);
 };
 
 export const getUrgencyLevel = (symptoms, symptomCategories) => {
@@ -64,20 +70,58 @@ export const getUrgencyLevel = (symptoms, symptomCategories) => {
   if (urgentSymptoms.length > 0) {
     return {
       level: "urgent",
-      color: "#e74c3c",
+      color: "#EF4444",
+      backgroundColor: "#FEF2F2",
       message: "Please seek immediate medical attention",
+      icon: "warning",
     };
   } else if (symptoms.length > 2) {
     return {
       level: "moderate",
-      color: "#f39c12",
+      color: "#F59E0B",
+      backgroundColor: "#FFFBEB",
       message: "Consider visiting a clinic within 24 hours",
+      icon: "alert-circle",
     };
   } else {
     return {
       level: "mild",
-      color: "#2E8B57",
+      color: "#10B981",
+      backgroundColor: "#ECFDF5",
       message: "You may try self-care measures",
+      icon: "checkmark-circle",
     };
   }
+};
+
+export const getQueueStatusColor = (queueCount) => {
+  if (queueCount < 10) return { color: "#10B981", label: "Short" };
+  if (queueCount < 20) return { color: "#F59E0B", label: "Medium" };
+  return { color: "#EF4444", label: "Long" };
+};
+
+export const getTimeGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+};
+
+export const generateAppointmentId = () => {
+  return `APT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
+export const generateQueueId = () => {
+  return `QUE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
+// Animation helpers
+export const fadeInAnimation = {
+  from: { opacity: 0, transform: [{ translateY: 20 }] },
+  to: { opacity: 1, transform: [{ translateY: 0 }] },
+};
+
+export const slideInAnimation = {
+  from: { transform: [{ translateX: 100 }] },
+  to: { transform: [{ translateX: 0 }] },
 };

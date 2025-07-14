@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useApp } from "../context/AppContext";
 import { styles } from "../styles/ComponentStyles";
 
@@ -76,90 +77,156 @@ export const QueueModal = ({ visible, onClose }) => {
 
   return (
     <Modal visible={visible} animationType="slide">
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>Join Queue</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color="#333" />
+      <SafeAreaView style={styles.modernModalContainer}>
+        {/* Modern Header */}
+        <View style={styles.modernModalHeader}>
+          <View style={styles.modalHeaderContent}>
+            <View style={styles.queueModalIconContainer}>
+              <Ionicons name="people" size={24} color="#667eea" />
+            </View>
+            <View style={styles.modalTitleContainer}>
+              <Text style={styles.modernModalTitle}>Join Queue</Text>
+              <Text style={styles.modernModalSubtitle}>
+                Enter your details to join the queue
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.modernCloseButton} onPress={onClose}>
+            <Ionicons name="close" size={24} color="#6B7280" />
           </TouchableOpacity>
         </View>
 
         <ScrollView
-          style={styles.modalContent}
+          style={styles.modernModalContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.modalClinicName}>
-            {selectedQueueClinic?.name}
-          </Text>
+          {/* Clinic Information Card */}
+          <View style={styles.queueClinicCard}>
+            <LinearGradient
+              colors={["#667eea", "#764ba2"]}
+              style={styles.queueClinicGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <View style={styles.queueClinicHeader}>
+                <View style={styles.queueClinicIconBadge}>
+                  <Ionicons name="medical" size={20} color="#fff" />
+                </View>
+                <View style={styles.queueClinicInfo}>
+                  <Text style={styles.queueClinicName}>
+                    {selectedQueueClinic?.name}
+                  </Text>
+                  <Text style={styles.queueClinicDetails}>
+                    Current queue: {selectedQueueClinic?.currentQueue} people
+                  </Text>
+                  <Text style={styles.queueClinicDetails}>
+                    Estimated wait: ~{selectedQueueClinic?.estimatedWait}{" "}
+                    minutes
+                  </Text>
+                </View>
+              </View>
+            </LinearGradient>
+          </View>
 
-          <View style={styles.queueInfoBanner}>
-            <Ionicons name="information-circle" size={24} color="#2E8B57" />
-            <View style={styles.queueInfoText}>
-              <Text style={styles.queueInfoTitle}>Queue Information</Text>
-              <Text style={styles.queueInfoSubtext}>
-                Current queue: {selectedQueueClinic?.currentQueue} people
-              </Text>
-              <Text style={styles.queueInfoSubtext}>
-                Estimated wait: ~{selectedQueueClinic?.estimatedWait} minutes
+          {/* Form Section */}
+          <View style={styles.formSection}>
+            <Text style={styles.formSectionTitle}>Personal Information</Text>
+            <Text style={styles.formSectionSubtitle}>
+              We need your details for queue registration and SMS notifications
+            </Text>
+
+            {/* Name Input */}
+            <View style={styles.modernInputGroup}>
+              <Text style={styles.modernInputLabel}>Full Name *</Text>
+              <View style={styles.inputWithIcon}>
+                <Ionicons name="person-outline" size={20} color="#667eea" />
+                <TextInput
+                  style={styles.modernModalInput}
+                  placeholder="Enter your full name"
+                  placeholderTextColor="#9CA3AF"
+                  value={queueFormData.name}
+                  onChangeText={(text) => handleInputChange("name", text)}
+                />
+              </View>
+            </View>
+
+            {/* ID Number Input */}
+            <View style={styles.modernInputGroup}>
+              <Text style={styles.modernInputLabel}>ID Number *</Text>
+              <View style={styles.inputWithIcon}>
+                <Ionicons name="card-outline" size={20} color="#667eea" />
+                <TextInput
+                  style={styles.modernModalInput}
+                  placeholder="Enter your 13-digit ID number"
+                  placeholderTextColor="#9CA3AF"
+                  value={queueFormData.idNumber}
+                  onChangeText={(text) => handleInputChange("idNumber", text)}
+                  keyboardType="numeric"
+                  maxLength={13}
+                />
+              </View>
+            </View>
+
+            {/* Phone Number Input */}
+            <View style={styles.modernInputGroup}>
+              <Text style={styles.modernInputLabel}>Phone Number *</Text>
+              <View style={styles.inputWithIcon}>
+                <Ionicons name="call-outline" size={20} color="#667eea" />
+                <TextInput
+                  style={styles.modernModalInput}
+                  placeholder="Enter your phone number"
+                  placeholderTextColor="#9CA3AF"
+                  value={queueFormData.phoneNumber}
+                  onChangeText={(text) =>
+                    handleInputChange("phoneNumber", text)
+                  }
+                  keyboardType="phone-pad"
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* SMS Notification Notice */}
+          <View style={styles.smsNoticeCard}>
+            <Ionicons name="notifications" size={20} color="#F59E0B" />
+            <View style={styles.smsNoticeContent}>
+              <Text style={styles.smsNoticeTitle}>SMS Notifications</Text>
+              <Text style={styles.smsNoticeText}>
+                You'll receive real-time updates about your queue position and
+                when it's your turn
               </Text>
             </View>
           </View>
 
-          <Text style={styles.personalDetailsHeader}>
-            Please provide your details for queue registration and
-            notifications:
-          </Text>
+          {/* Action Buttons */}
+          <View style={styles.modernModalActions}>
+            <TouchableOpacity
+              style={styles.cancelQueueButton}
+              onPress={onClose}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.cancelQueueText}>Cancel</Text>
+            </TouchableOpacity>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Full Name *</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Enter your full name"
-              value={queueFormData.name}
-              onChangeText={(text) => handleInputChange("name", text)}
-            />
+            <TouchableOpacity
+              style={styles.modernJoinQueueButton}
+              onPress={handleSubmit}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={["#667eea", "#764ba2"]}
+                style={styles.joinQueueButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="people" size={20} color="#fff" />
+                <Text style={styles.modernJoinQueueText}>Join Queue</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>ID Number *</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Enter your 13-digit ID number"
-              value={queueFormData.idNumber}
-              onChangeText={(text) => handleInputChange("idNumber", text)}
-              keyboardType="numeric"
-              maxLength={13}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Phone Number *</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="Enter your phone number"
-              value={queueFormData.phoneNumber}
-              onChangeText={(text) => handleInputChange("phoneNumber", text)}
-              keyboardType="phone-pad"
-            />
-          </View>
-
-          <View style={styles.notificationNotice}>
-            <Ionicons name="notifications" size={20} color="#2E8B57" />
-            <Text style={styles.notificationNoticeText}>
-              You'll receive SMS notifications about your queue status and when
-              it's your turn
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles.confirmQueueBtn}
-            onPress={handleSubmit}
-          >
-            <Text style={styles.confirmQueueText}>Join Queue</Text>
-          </TouchableOpacity>
-
-          {/* Add extra padding at bottom to ensure button is visible */}
-          <View style={{ height: 20 }} />
+          {/* Bottom spacing */}
+          <View style={{ height: 40 }} />
         </ScrollView>
       </SafeAreaView>
     </Modal>

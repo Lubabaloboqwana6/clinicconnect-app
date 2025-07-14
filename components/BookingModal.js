@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useApp } from "../context/AppContext";
 import { styles } from "../styles/ComponentStyles";
 
@@ -76,56 +77,143 @@ export const BookingModal = ({ visible, onClose }) => {
 
   return (
     <Modal visible={visible} animationType="slide">
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>Book Appointment</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color="#333" />
+      <SafeAreaView style={styles.modernModalContainer}>
+        {/* Modern Header */}
+        <View style={styles.modernModalHeader}>
+          <View style={styles.modalHeaderContent}>
+            <View style={styles.modalIconContainer}>
+              <Ionicons name="calendar" size={24} color="#667eea" />
+            </View>
+            <View style={styles.modalTitleContainer}>
+              <Text style={styles.modernModalTitle}>Book Appointment</Text>
+              <Text style={styles.modernModalSubtitle}>
+                Schedule your healthcare visit
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.modernCloseButton} onPress={onClose}>
+            <Ionicons name="close" size={24} color="#6B7280" />
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.modalContent}>
-          <Text style={styles.modalClinicName}>{selectedClinic?.name}</Text>
+        <ScrollView
+          style={styles.modernModalContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Clinic Information Card */}
+          <View style={styles.clinicInfoCard}>
+            <View style={styles.clinicInfoHeader}>
+              <View style={styles.clinicIconBadge}>
+                <Ionicons name="medical" size={20} color="#667eea" />
+              </View>
+              <View style={styles.clinicInfoContent}>
+                <Text style={styles.clinicInfoTitle}>Selected Clinic</Text>
+                <Text style={styles.clinicInfoName}>
+                  {selectedClinic?.name}
+                </Text>
+              </View>
+            </View>
+          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Service *</Text>
-            <TouchableOpacity
-              style={styles.serviceSelector}
-              onPress={handleServiceSelect}
-            >
-              <Text style={styles.serviceSelectorText}>
-                {bookingFormData.service || "Select a service"}
+          {/* Form Section */}
+          <View style={styles.formSection}>
+            <Text style={styles.formSectionTitle}>Appointment Details</Text>
+
+            {/* Service Selection */}
+            <View style={styles.modernInputGroup}>
+              <Text style={styles.modernInputLabel}>Service *</Text>
+              <TouchableOpacity
+                style={styles.modernServiceSelector}
+                onPress={handleServiceSelect}
+                activeOpacity={0.7}
+              >
+                <View style={styles.serviceSelectorContent}>
+                  <Ionicons name="medical-outline" size={20} color="#667eea" />
+                  <Text
+                    style={[
+                      styles.modernServiceSelectorText,
+                      !bookingFormData.service && styles.placeholderText,
+                    ]}
+                  >
+                    {bookingFormData.service || "Select a service"}
+                  </Text>
+                </View>
+                <Ionicons name="chevron-down" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Date Input */}
+            <View style={styles.modernInputGroup}>
+              <Text style={styles.modernInputLabel}>Date *</Text>
+              <View style={styles.inputWithIcon}>
+                <Ionicons name="calendar-outline" size={20} color="#667eea" />
+                <TextInput
+                  style={styles.modernModalInput}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor="#9CA3AF"
+                  value={bookingFormData.date}
+                  onChangeText={(text) => handleInputChange("date", text)}
+                />
+              </View>
+            </View>
+
+            {/* Time Input */}
+            <View style={styles.modernInputGroup}>
+              <Text style={styles.modernInputLabel}>Time *</Text>
+              <View style={styles.inputWithIcon}>
+                <Ionicons name="time-outline" size={20} color="#667eea" />
+                <TextInput
+                  style={styles.modernModalInput}
+                  placeholder="HH:MM"
+                  placeholderTextColor="#9CA3AF"
+                  value={bookingFormData.time}
+                  onChangeText={(text) => handleInputChange("time", text)}
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Information Notice */}
+          <View style={styles.infoNoticeCard}>
+            <Ionicons name="information-circle" size={20} color="#667eea" />
+            <View style={styles.infoNoticeContent}>
+              <Text style={styles.infoNoticeTitle}>Booking Information</Text>
+              <Text style={styles.infoNoticeText}>
+                You'll receive a confirmation SMS with your appointment details.
+                Please arrive 15 minutes early.
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#666" />
+            </View>
+          </View>
+
+          {/* Action Buttons */}
+          <View style={styles.modernModalActions}>
+            <TouchableOpacity
+              style={styles.cancelBookingButton}
+              onPress={onClose}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.cancelBookingText}>Cancel</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modernConfirmButton}
+              onPress={handleSubmit}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={["#667eea", "#764ba2"]}
+                style={styles.confirmButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                <Text style={styles.modernConfirmText}>Confirm Booking</Text>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Date *</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="YYYY-MM-DD"
-              value={bookingFormData.date}
-              onChangeText={(text) => handleInputChange("date", text)}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Time *</Text>
-            <TextInput
-              style={styles.modalInput}
-              placeholder="HH:MM"
-              value={bookingFormData.time}
-              onChangeText={(text) => handleInputChange("time", text)}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={styles.confirmBookingBtn}
-            onPress={handleSubmit}
-          >
-            <Text style={styles.confirmBookingText}>Confirm Booking</Text>
-          </TouchableOpacity>
+          {/* Bottom spacing */}
+          <View style={{ height: 40 }} />
         </ScrollView>
       </SafeAreaView>
     </Modal>

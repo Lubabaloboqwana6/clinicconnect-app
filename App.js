@@ -1,8 +1,9 @@
+// App.js - Update the import and case statement
 import React, { useState } from "react";
 import { SafeAreaView, StatusBar } from "react-native";
 import { HomeScreen } from "./screens/HomeScreen";
 import { ClinicsScreen } from "./screens/ClinicsScreen";
-import { SymptomsScreen } from "./screens/SymptomsScreen";
+import { AIChatScreen } from "./screens/AIChatScreen"; // CHANGED: from SymptomsScreen
 import { AppointmentsScreen } from "./screens/AppointmentsScreen";
 import { QueueScreen } from "./screens/QueueScreen";
 import { BottomNavigation } from "./components/BottomNavigation";
@@ -29,7 +30,7 @@ const App = () => {
           />
         );
       case "symptoms":
-        return <SymptomsScreen onNavigate={setCurrentScreen} />;
+        return <AIChatScreen onNavigate={setCurrentScreen} />; // CHANGED: from SymptomsScreen
       case "appointments":
         return <AppointmentsScreen onNavigate={setCurrentScreen} />;
       case "queue":
@@ -47,7 +48,7 @@ const App = () => {
   return (
     <AppProvider>
       <SafeAreaView style={styles.app}>
-        <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
+        <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
         {renderScreen()}
         <QueueModal
           visible={showQueueModal}

@@ -1,4 +1,4 @@
-// data/mockData.js - Mock data
+// data/mockData.js - Remove symptom categories, keep only clinic data
 export const mockClinics = [
   {
     id: 1,
@@ -35,13 +35,4 @@ export const mockClinics = [
   },
 ];
 
-export const symptomCategories = [
-  { id: 1, name: "Fever", icon: "🌡️", urgent: false },
-  { id: 2, name: "Cough", icon: "😷", urgent: false },
-  { id: 3, name: "Chest Pain", icon: "💔", urgent: true },
-  { id: 4, name: "Headache", icon: "🤕", urgent: false },
-  { id: 5, name: "Stomach Pain", icon: "🤢", urgent: false },
-  { id: 6, name: "Breathing Problems", icon: "🫁", urgent: true },
-  { id: 7, name: "Injury", icon: "🩹", urgent: true },
-  { id: 8, name: "Rash", icon: "🔴", urgent: false },
-];
+// REMOVED: symptomCategories export
