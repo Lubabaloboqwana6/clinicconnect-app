@@ -48,7 +48,7 @@ export const QueueScreen = ({ onNavigate, onShowQueueModal }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Queue Status" />
+      <Header title="Queue Status" onNavigate={onNavigate} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {userQueue ? (

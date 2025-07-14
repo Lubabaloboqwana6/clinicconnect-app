@@ -63,7 +63,7 @@ export const AppointmentsScreen = ({ onNavigate }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Appointments" />
+      <Header title="Appointments" onNavigate={onNavigate} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}

@@ -8,14 +8,16 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "../context/AppContext";
+import { useNotifications } from "../hooks/useNotifications"; // Add this import
 import { styles } from "../styles/ComponentStyles";
 
-export const Header = ({ title }) => {
+export const Header = ({ title, onNavigate }) => {
+  // Add onNavigate prop
   const { userQueue } = useApp();
+  const { unreadCount } = useNotifications(); // Add this
 
   return (
     <View style={styles.headerContainer}>
-      {/* Add status bar height for Android */}
       {Platform.OS === "android" && (
         <View style={{ height: StatusBar.currentHeight }} />
       )}
@@ -28,9 +30,21 @@ export const Header = ({ title }) => {
         <Text style={styles.appTitle}>{title || "ClinicConnect+"}</Text>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.notificationButton}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() => onNavigate && onNavigate("notifications")} // Add navigation
+            activeOpacity={0.7}
+          >
             <Ionicons name="notifications-outline" size={24} color="#1F2937" />
-            {userQueue && <View style={styles.notificationBadge} />}
+            {(userQueue || unreadCount > 0) && (
+              <View style={styles.notificationBadge}>
+                {unreadCount > 0 && (
+                  <Text style={styles.notificationBadgeText}>
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </Text>
+                )}
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>

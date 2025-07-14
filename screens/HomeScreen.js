@@ -52,7 +52,7 @@ export const HomeScreen = ({ onNavigate }) => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <Header />
+      <Header onNavigate={onNavigate} />
 
       {/* Welcome Section */}
       <View style={styles.welcomeSection}>

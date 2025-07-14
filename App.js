@@ -1,11 +1,11 @@
-// App.js - Update the import and case statement
 import React, { useState } from "react";
-import { SafeAreaView, StatusBar } from "react-native";
+import { SafeAreaView, StatusBar, Platform } from "react-native";
 import { HomeScreen } from "./screens/HomeScreen";
 import { ClinicsScreen } from "./screens/ClinicsScreen";
-import { AIChatScreen } from "./screens/AIChatScreen"; // CHANGED: from SymptomsScreen
+import { AIChatScreen } from "./screens/AIChatScreen";
 import { AppointmentsScreen } from "./screens/AppointmentsScreen";
 import { QueueScreen } from "./screens/QueueScreen";
+import { NotificationsScreen } from "./screens/NotificationsScreen"; // NEW: Add this import
 import { BottomNavigation } from "./components/BottomNavigation";
 import { BookingModal } from "./components/BookingModal";
 import { QueueModal } from "./components/QueueModal";
@@ -30,7 +30,7 @@ const App = () => {
           />
         );
       case "symptoms":
-        return <AIChatScreen onNavigate={setCurrentScreen} />; // CHANGED: from SymptomsScreen
+        return <AIChatScreen onNavigate={setCurrentScreen} />;
       case "appointments":
         return <AppointmentsScreen onNavigate={setCurrentScreen} />;
       case "queue":
@@ -40,6 +40,8 @@ const App = () => {
             onShowQueueModal={() => setShowQueueModal(true)}
           />
         );
+      case "notifications": // NEW: Add this case
+        return <NotificationsScreen onNavigate={setCurrentScreen} />;
       default:
         return <HomeScreen onNavigate={setCurrentScreen} />;
     }
@@ -48,7 +50,11 @@ const App = () => {
   return (
     <AppProvider>
       <SafeAreaView style={styles.app}>
-        <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="#F8FAFC"
+          translucent={false}
+        />
         {renderScreen()}
         <QueueModal
           visible={showQueueModal}

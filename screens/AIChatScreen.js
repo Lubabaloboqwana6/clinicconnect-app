@@ -211,7 +211,7 @@ export const AIChatScreen = ({ onNavigate }) => {
 
   return (
     <View style={styles.chatContainer}>
-      <Header title="AI Health Assistant" />
+      <Header title="AI Health Assistant" onNavigate={onNavigate} />
 
       <KeyboardAvoidingView
         style={styles.chatKeyboardView}

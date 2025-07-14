@@ -45,7 +45,7 @@ export const ClinicsScreen = ({
 
   return (
     <View style={styles.container}>
-      <Header title="Find Clinics" />
+      <Header title="Find Clinics" onNavigate={onNavigate} />
 
       {/* Search Header */}
       <View style={styles.searchHeader}>
