@@ -37,11 +37,14 @@ export const Header = ({ title, onNavigate }) => {
           >
             <Ionicons name="notifications-outline" size={24} color="#1F2937" />
             {(userQueue || unreadCount > 0) && (
-              <View style={styles.notificationBadge}>
+              <View style={styles.enhancedNotificationBadge}>
                 {unreadCount > 0 && (
-                  <Text style={styles.notificationBadgeText}>
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </Text>
+                  <>
+                    <Text style={styles.enhancedNotificationBadgeText}>
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </Text>
+                    <View style={styles.notificationPulse} />
+                  </>
                 )}
               </View>
             )}

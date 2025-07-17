@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useApp } from "../context/AppContext";
 
+// Helper function moved here since it's not in helpers.js
+const calculateEstimatedTime = (currentQueue, avgTimePerPatient = 15) => {
+  return Math.max(currentQueue * avgTimePerPatient, 5);
+};
+
 export const useQueue = () => {
   const { userQueue, setUserQueue } = useApp();
   const [estimatedWaitTime, setEstimatedWaitTime] = useState(null);

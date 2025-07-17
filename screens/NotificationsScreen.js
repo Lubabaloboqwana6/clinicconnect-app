@@ -1,5 +1,14 @@
-import React from "react";
-import { ScrollView, View, Text, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  RefreshControl,
+  Animated,
+  Dimensions,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Header } from "../components/Header";
@@ -8,6 +17,8 @@ import { EmptyState } from "../components/EmptyState";
 import { useApp } from "../context/AppContext";
 import { useNotifications } from "../hooks/useNotifications";
 import { styles } from "../styles/ScreenStyles";
+
+const { width } = Dimensions.get("window");
 
 export const NotificationsScreen = ({ onNavigate }) => {
   const { userQueue } = useApp();
@@ -19,8 +30,48 @@ export const NotificationsScreen = ({ onNavigate }) => {
     deleteNotification,
   } = useNotifications();
 
+  const [refreshing, setRefreshing] = useState(false);
+  const [filterType, setFilterType] = useState("all"); // all, unread, read
+  const [animatedValue] = useState(new Animated.Value(0));
+
+  // Filter notifications based on selected filter
+  const filteredNotifications = notifications.filter((notification) => {
+    switch (filterType) {
+      case "unread":
+        return !notification.read;
+      case "read":
+        return notification.read;
+      default:
+        return true;
+    }
+  });
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Simulate refresh delay
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  };
+
   const handleNotificationPress = (notification) => {
-    markAsRead(notification.id);
+    if (!notification.read) {
+      markAsRead(notification.id);
+
+      // Add subtle animation for feedback
+      Animated.sequence([
+        Animated.timing(animatedValue, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
 
     // Handle navigation based on notification type
     switch (notification.type) {
@@ -33,8 +84,14 @@ export const NotificationsScreen = ({ onNavigate }) => {
       case "clinic_recommendation":
         onNavigate("clinics");
         break;
+      case "emergency":
+        Alert.alert(
+          "Emergency Information",
+          "For immediate medical emergencies, call:\n\n🚨 Emergency Services: 10177\n🚑 ER24: 082 911\n\nFor urgent but non-emergency care, visit your nearest clinic."
+        );
+        break;
       case "health_tip":
-        // Stay on notifications screen
+        // Stay on notifications screen for health tips
         break;
       default:
         break;
@@ -50,7 +107,9 @@ export const NotificationsScreen = ({ onNavigate }) => {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => deleteNotification(notificationId),
+          onPress: () => {
+            deleteNotification(notificationId);
+          },
         },
       ]
     );
@@ -60,79 +119,228 @@ export const NotificationsScreen = ({ onNavigate }) => {
     if (unreadCount > 0) {
       Alert.alert(
         "Mark All as Read",
-        `Mark all ${unreadCount} notifications as read?`,
+        `Mark all ${unreadCount} unread notifications as read?`,
         [
           { text: "Cancel", style: "cancel" },
           {
-            text: "Mark All",
-            onPress: () => markAllAsRead(),
+            text: "Mark All Read",
+            onPress: () => {
+              markAllAsRead();
+            },
           },
         ]
       );
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Header title="Notifications" />
+  const handleClearAll = () => {
+    if (notifications.length > 0) {
+      Alert.alert(
+        "Clear All Notifications",
+        "Are you sure you want to delete all notifications? This action cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Clear All",
+            style: "destructive",
+            onPress: () => {
+              notifications.forEach((notification) => {
+                deleteNotification(notification.id);
+              });
+            },
+          },
+        ]
+      );
+    }
+  };
 
-      {/* Notifications Header */}
-      <View style={styles.notificationsHeader}>
-        <View style={styles.notificationsHeaderContent}>
-          <View style={styles.notificationsIconBadge}>
-            <Ionicons name="notifications" size={28} color="#667eea" />
-            {unreadCount > 0 && (
-              <View style={styles.notificationsCountBadge}>
-                <Text style={styles.notificationsCountText}>
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </Text>
-              </View>
-            )}
-          </View>
-          <View style={styles.notificationsHeaderText}>
-            <Text style={styles.screenTitle}>Notifications</Text>
-            <Text style={styles.screenSubtitle}>
-              {unreadCount > 0
-                ? `${unreadCount} new notification${unreadCount > 1 ? "s" : ""}`
-                : "You're all caught up!"}
+  const FilterButton = ({ type, label, count }) => {
+    const isActive = filterType === type;
+    return (
+      <TouchableOpacity
+        style={[styles.filterButton, isActive && styles.activeFilterButton]}
+        onPress={() => setFilterType(type)}
+        activeOpacity={0.7}
+      >
+        <Text
+          style={[
+            styles.filterButtonText,
+            isActive && styles.activeFilterButtonText,
+          ]}
+        >
+          {label}
+        </Text>
+        {count > 0 && (
+          <View
+            style={[styles.filterBadge, isActive && styles.activeFilterBadge]}
+          >
+            <Text
+              style={[
+                styles.filterBadgeText,
+                isActive && styles.activeFilterBadgeText,
+              ]}
+            >
+              {count}
             </Text>
           </View>
-        </View>
-
-        {/* Mark All as Read Button */}
-        {unreadCount > 0 && (
-          <TouchableOpacity
-            style={styles.markAllReadButton}
-            onPress={handleMarkAllAsRead}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.markAllReadText}>Mark all read</Text>
-          </TouchableOpacity>
         )}
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <Header title="Notifications" onNavigate={onNavigate} />
+
+      {/* Enhanced Header Section */}
+      <View style={styles.notificationsHeader}>
+        <LinearGradient
+          colors={["#667eea", "#764ba2"]}
+          style={styles.notificationsHeaderGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.notificationsHeaderContent}>
+            <View style={styles.notificationsIconBadge}>
+              <Ionicons name="notifications" size={32} color="#fff" />
+              {unreadCount > 0 && (
+                <View style={styles.headerNotificationBadge}>
+                  <Text style={styles.headerNotificationBadgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.notificationsHeaderText}>
+              <Text style={styles.notificationsTitle}>Notifications</Text>
+              <Text style={styles.notificationsSubtitle}>
+                {unreadCount > 0
+                  ? `${unreadCount} new notification${
+                      unreadCount > 1 ? "s" : ""
+                    }`
+                  : "You're all caught up!"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Action Buttons Row */}
+          <View style={styles.notificationsActions}>
+            {unreadCount > 0 && (
+              <TouchableOpacity
+                style={styles.headerActionButton}
+                onPress={handleMarkAllAsRead}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="checkmark-done" size={16} color="#fff" />
+                <Text style={styles.headerActionText}>Mark All Read</Text>
+              </TouchableOpacity>
+            )}
+
+            {notifications.length > 0 && (
+              <TouchableOpacity
+                style={styles.headerActionButton}
+                onPress={handleClearAll}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="trash" size={16} color="#fff" />
+                <Text style={styles.headerActionText}>Clear All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </LinearGradient>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {notifications.length === 0 ? (
-          // Empty State
+      {/* Filter Tabs */}
+      {notifications.length > 0 && (
+        <View style={styles.filterContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterScrollContent}
+          >
+            <FilterButton type="all" label="All" count={notifications.length} />
+            <FilterButton type="unread" label="Unread" count={unreadCount} />
+            <FilterButton
+              type="read"
+              label="Read"
+              count={notifications.length - unreadCount}
+            />
+          </ScrollView>
+        </View>
+      )}
+
+      {/* Notifications List */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#667eea"]}
+            tintColor="#667eea"
+          />
+        }
+      >
+        {filteredNotifications.length === 0 ? (
+          // Enhanced Empty State
           <EmptyState
-            icon="notifications-outline"
-            title="No Notifications"
-            description="You'll see your health updates, appointment reminders, and queue notifications here."
-            buttonText="Go to Health Chat"
-            onButtonPress={() => onNavigate("symptoms")}
+            icon={
+              filterType === "unread"
+                ? "checkmark-circle"
+                : "notifications-outline"
+            }
+            title={
+              filterType === "unread"
+                ? "No Unread Notifications"
+                : filterType === "read"
+                ? "No Read Notifications"
+                : "No Notifications"
+            }
+            description={
+              filterType === "unread"
+                ? "Great! You've read all your notifications."
+                : filterType === "read"
+                ? "No read notifications to show."
+                : "You'll receive updates about appointments, queue status, and health tips here."
+            }
+            buttonText={filterType !== "all" ? "View All" : "Go to Health Chat"}
+            onButtonPress={() =>
+              filterType !== "all"
+                ? setFilterType("all")
+                : onNavigate("symptoms")
+            }
             gradient={true}
           />
         ) : (
           // Notifications List
           <View style={styles.notificationsContainer}>
-            {notifications.map((notification) => (
-              <NotificationCard
+            {filteredNotifications.map((notification, index) => (
+              <Animated.View
                 key={notification.id}
-                notification={notification}
-                onPress={handleNotificationPress}
-                onDelete={handleDeleteNotification}
-              />
+                style={[
+                  {
+                    opacity: animatedValue.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [1, 0.5],
+                    }),
+                  },
+                ]}
+              >
+                <NotificationCard
+                  notification={notification}
+                  onPress={handleNotificationPress}
+                  onDelete={handleDeleteNotification}
+                />
+              </Animated.View>
             ))}
+
+            {/* Summary Footer */}
+            <View style={styles.notificationsSummary}>
+              <Text style={styles.summaryText}>
+                Showing {filteredNotifications.length} of {notifications.length}{" "}
+                notifications
+              </Text>
+            </View>
           </View>
         )}
 
