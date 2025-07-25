@@ -73,27 +73,119 @@ export const NotificationsScreen = ({ onNavigate }) => {
       ]).start();
     }
 
-    // Handle navigation based on notification type
+    // Enhanced navigation based on notification type and linked data
     switch (notification.type) {
       case "queue_update":
-        onNavigate("queue");
+        if (notification.linkedType === "queue") {
+          // If user is still in queue, go to queue screen
+          if (userQueue && userQueue.clinicId === notification.linkedId) {
+            onNavigate("queue");
+          } else {
+            // If no longer in queue, show clinic info or go to clinics
+            Alert.alert(
+              "Queue Information",
+              `This notification was about ${
+                notification.actionData?.clinicName || "a clinic queue"
+              }.\n\nWould you like to find nearby clinics?`,
+              [
+                { text: "Cancel", style: "cancel" },
+                { text: "Find Clinics", onPress: () => onNavigate("clinics") },
+              ]
+            );
+          }
+        } else {
+          onNavigate("queue");
+        }
         break;
+
       case "appointment_reminder":
-        onNavigate("appointments");
+        if (
+          notification.linkedType === "appointment" &&
+          notification.actionData
+        ) {
+          // Check if appointment still exists
+          const appointment = appointments.find(
+            (apt) => apt.id === notification.linkedId
+          );
+
+          if (appointment) {
+            // Show appointment details and navigate to appointments
+            Alert.alert(
+              "Appointment Details",
+              `📅 Date: ${notification.actionData.date}\n🕐 Time: ${
+                notification.actionData.time
+              }\n🏥 Clinic: ${
+                notification.actionData.clinicName
+              }\n💊 Service: ${
+                notification.actionData.service || "General consultation"
+              }`,
+              [
+                { text: "OK", onPress: () => onNavigate("appointments") },
+                {
+                  text: "View All Appointments",
+                  onPress: () => onNavigate("appointments"),
+                },
+              ]
+            );
+          } else {
+            // Appointment no longer exists (might have been cancelled)
+            Alert.alert(
+              "Appointment Not Found",
+              "This appointment may have been cancelled or modified. Check your appointments list for current bookings.",
+              [
+                {
+                  text: "View Appointments",
+                  onPress: () => onNavigate("appointments"),
+                },
+              ]
+            );
+          }
+        } else {
+          onNavigate("appointments");
+        }
         break;
+
       case "clinic_recommendation":
-        onNavigate("clinics");
+        if (notification.actionData?.clinicId) {
+          // Navigate to clinics and potentially highlight specific clinic
+          onNavigate("clinics");
+        } else {
+          onNavigate("clinics");
+        }
         break;
+
       case "emergency":
         Alert.alert(
-          "Emergency Information",
-          "For immediate medical emergencies, call:\n\n🚨 Emergency Services: 10177\n🚑 ER24: 082 911\n\nFor urgent but non-emergency care, visit your nearest clinic."
+          "🚨 Emergency Information",
+          "For immediate medical emergencies:\n\n📞 Emergency Services: 10177\n🚑 ER24: 082 911\n🏥 Netcare 911: 082 911\n\nFor urgent but non-emergency care, visit your nearest clinic.",
+          [
+            { text: "OK" },
+            {
+              text: "Find Nearest Clinic",
+              onPress: () => onNavigate("clinics"),
+            },
+          ]
         );
         break;
+
       case "health_tip":
-        // Stay on notifications screen for health tips
+        // Stay on notifications screen for health tips, maybe show expanded tip
+        Alert.alert("💡 Health Tip", notification.message, [
+          { text: "Thanks!" },
+          { text: "Chat with AI", onPress: () => onNavigate("symptoms") },
+        ]);
         break;
+
+      case "system":
+        // Handle system notifications (app updates, maintenance, etc.)
+        Alert.alert("System Information", notification.message, [
+          { text: "OK" },
+        ]);
+        break;
+
       default:
+        // Default behavior for unknown notification types
+        Alert.alert(notification.title, notification.message, [{ text: "OK" }]);
         break;
     }
   };

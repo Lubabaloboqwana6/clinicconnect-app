@@ -1,45 +1,15 @@
 import { useState, useEffect } from "react";
 import { useApp } from "../context/AppContext";
 
-// Mock notifications data
-const mockNotifications = [
+// Base mock notifications (can be removed later)
+const baseMockNotifications = [
   {
-    id: 1,
-    type: "queue_update",
-    title: "Queue Update",
-    message:
-      "You're now #3 in line at Soweto Community Clinic. Estimated wait: 25 minutes.",
-    timestamp: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
-    read: false,
-    priority: "normal",
-  },
-  {
-    id: 2,
-    type: "appointment_reminder",
-    title: "Appointment Reminder",
-    message:
-      "Your appointment at Alexandra Health Centre is tomorrow at 2:30 PM. Please arrive 15 minutes early.",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-    read: false,
-    priority: "high",
-  },
-  {
-    id: 3,
+    id: 1000,
     type: "health_tip",
     title: "Daily Health Tip",
     message:
       "Remember to stay hydrated! Aim for 8 glasses of water throughout the day for optimal health.",
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
-    read: true,
-    priority: "normal",
-  },
-  {
-    id: 4,
-    type: "clinic_recommendation",
-    title: "Clinic Recommendation",
-    message:
-      "Based on your symptoms, we recommend visiting Diepsloot Primary Healthcare for specialized care.",
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
     read: true,
     priority: "normal",
   },
@@ -47,85 +17,279 @@ const mockNotifications = [
 
 export const useNotifications = () => {
   const { userQueue, appointments } = useApp();
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState(baseMockNotifications);
 
   // Calculate unread count
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  // Generate dynamic notifications based on app state
-  useEffect(() => {
-    if (userQueue) {
-      // Add queue update notification
-      const queueNotification = {
-        id: Date.now(),
-        type: "queue_update",
-        title: "Queue Status Update",
-        message: `You're #${userQueue.position} in line at ${userQueue.clinicName}. Estimated wait: ${userQueue.estimatedWait} minutes.`,
-        timestamp: new Date(),
-        read: false,
-        priority: "normal",
-      };
+  // Generate appointment-related notifications
+  const generateAppointmentNotifications = (
+    appointment,
+    action = "created"
+  ) => {
+    const baseId = Date.now();
+    const newNotifications = [];
 
-      setNotifications((prev) => {
-        // Check if similar notification already exists
-        const existingIndex = prev.findIndex(
-          (n) =>
-            n.type === "queue_update" &&
-            n.message.includes(userQueue.clinicName)
+    switch (action) {
+      case "created":
+        // Immediate confirmation
+        newNotifications.push({
+          id: baseId,
+          type: "appointment_reminder",
+          title: "Appointment Confirmed! 🎉",
+          message: `Your appointment at ${appointment.clinicName} has been confirmed for ${appointment.date} at ${appointment.time}. Service: ${appointment.service}`,
+          timestamp: new Date(),
+          read: false,
+          priority: "normal",
+          linkedId: appointment.id,
+          linkedType: "appointment",
+          actionData: {
+            appointmentId: appointment.id,
+            clinicName: appointment.clinicName,
+            date: appointment.date,
+            time: appointment.time,
+            service: appointment.service,
+          },
+        });
+
+        // 24-hour reminder (simulated as 10 seconds for demo)
+        setTimeout(() => {
+          setNotifications((prev) => [
+            ...prev,
+            {
+              id: baseId + 1,
+              type: "appointment_reminder",
+              title: "Appointment Tomorrow! ⏰",
+              message: `Don't forget your appointment at ${appointment.clinicName} tomorrow at ${appointment.time}. Please arrive 15 minutes early.`,
+              timestamp: new Date(),
+              read: false,
+              priority: "high",
+              linkedId: appointment.id,
+              linkedType: "appointment",
+              actionData: {
+                appointmentId: appointment.id,
+                clinicName: appointment.clinicName,
+                date: appointment.date,
+                time: appointment.time,
+              },
+            },
+          ]);
+        }, 10000); // 10 seconds for demo
+
+        break;
+
+      case "cancelled":
+        newNotifications.push({
+          id: baseId,
+          type: "appointment_reminder",
+          title: "Appointment Cancelled",
+          message: `Your appointment at ${appointment.clinicName} scheduled for ${appointment.date} at ${appointment.time} has been cancelled.`,
+          timestamp: new Date(),
+          read: false,
+          priority: "normal",
+          linkedId: appointment.id,
+          linkedType: "appointment",
+        });
+        break;
+
+      case "rescheduled":
+        newNotifications.push({
+          id: baseId,
+          type: "appointment_reminder",
+          title: "Appointment Rescheduled",
+          message: `Your appointment at ${appointment.clinicName} has been rescheduled to ${appointment.date} at ${appointment.time}.`,
+          timestamp: new Date(),
+          read: false,
+          priority: "normal",
+          linkedId: appointment.id,
+          linkedType: "appointment",
+          actionData: {
+            appointmentId: appointment.id,
+            clinicName: appointment.clinicName,
+            date: appointment.date,
+            time: appointment.time,
+          },
+        });
+        break;
+    }
+
+    return newNotifications;
+  };
+
+  // Generate queue-related notifications
+  const generateQueueNotifications = (queue, action = "joined") => {
+    const baseId = Date.now();
+    const newNotifications = [];
+
+    switch (action) {
+      case "joined":
+        newNotifications.push({
+          id: baseId,
+          type: "queue_update",
+          title: "Queue Joined Successfully! 🏥",
+          message: `You're now #${queue.position} in line at ${queue.clinicName}. Estimated wait time: ${queue.estimatedWait} minutes.`,
+          timestamp: new Date(),
+          read: false,
+          priority: "normal",
+          linkedId: queue.clinicId,
+          linkedType: "queue",
+          actionData: {
+            clinicId: queue.clinicId,
+            clinicName: queue.clinicName,
+            position: queue.position,
+            estimatedWait: queue.estimatedWait,
+          },
+        });
+        break;
+
+      case "position_updated":
+        if (queue.position <= 3) {
+          newNotifications.push({
+            id: baseId,
+            type: "queue_update",
+            title: "Almost Your Turn! 🔔",
+            message: `You're now #${queue.position} in line at ${queue.clinicName}. Please prepare to be called soon!`,
+            timestamp: new Date(),
+            read: false,
+            priority: "high",
+            linkedId: queue.clinicId,
+            linkedType: "queue",
+            actionData: {
+              clinicId: queue.clinicId,
+              clinicName: queue.clinicName,
+              position: queue.position,
+              estimatedWait: queue.estimatedWait,
+            },
+          });
+        } else {
+          newNotifications.push({
+            id: baseId,
+            type: "queue_update",
+            title: "Queue Position Updated",
+            message: `You're now #${queue.position} in line at ${queue.clinicName}. Estimated wait: ${queue.estimatedWait} minutes.`,
+            timestamp: new Date(),
+            read: false,
+            priority: "normal",
+            linkedId: queue.clinicId,
+            linkedType: "queue",
+            actionData: {
+              clinicId: queue.clinicId,
+              clinicName: queue.clinicName,
+              position: queue.position,
+              estimatedWait: queue.estimatedWait,
+            },
+          });
+        }
+        break;
+
+      case "left":
+        newNotifications.push({
+          id: baseId,
+          type: "queue_update",
+          title: "Left Queue",
+          message: `You have left the queue at ${queue.clinicName}. Thank you for using our service!`,
+          timestamp: new Date(),
+          read: false,
+          priority: "normal",
+          linkedId: queue.clinicId,
+          linkedType: "queue",
+        });
+        break;
+    }
+
+    return newNotifications;
+  };
+
+  // Listen for new appointments
+  useEffect(() => {
+    // Check for new appointments (compare with previous)
+    const checkForNewAppointments = () => {
+      appointments.forEach((appointment) => {
+        // Check if we already have a notification for this appointment
+        const existingNotification = notifications.find(
+          (n) => n.linkedType === "appointment" && n.linkedId === appointment.id
         );
 
-        if (existingIndex !== -1) {
-          // Update existing notification
-          const updated = [...prev];
-          updated[existingIndex] = queueNotification;
-          return updated;
-        } else {
-          // Add new notification
-          return [queueNotification, ...prev];
+        if (!existingNotification && appointment.createdAt) {
+          const createdTime = new Date(appointment.createdAt);
+          const timeDiff = Date.now() - createdTime.getTime();
+
+          // If appointment was created in the last 5 seconds, generate notification
+          if (timeDiff < 5000) {
+            const newNotifications = generateAppointmentNotifications(
+              appointment,
+              "created"
+            );
+            setNotifications((prev) => [...newNotifications, ...prev]);
+          }
         }
       });
+    };
+
+    checkForNewAppointments();
+  }, [appointments.length]); // Only run when appointments array length changes
+
+  // Listen for queue changes
+  useEffect(() => {
+    if (userQueue) {
+      // Check if this is a new queue join
+      const existingQueueNotification = notifications.find(
+        (n) =>
+          n.linkedType === "queue" &&
+          n.linkedId === userQueue.clinicId &&
+          n.message.includes("Queue Joined Successfully")
+      );
+
+      if (!existingQueueNotification) {
+        // New queue join
+        const newNotifications = generateQueueNotifications(
+          userQueue,
+          "joined"
+        );
+        setNotifications((prev) => [...newNotifications, ...prev]);
+      } else {
+        // Position update
+        const lastPositionNotification = notifications
+          .filter(
+            (n) => n.linkedType === "queue" && n.linkedId === userQueue.clinicId
+          )
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+
+        if (
+          lastPositionNotification?.actionData?.position &&
+          lastPositionNotification.actionData.position !== userQueue.position
+        ) {
+          const newNotifications = generateQueueNotifications(
+            userQueue,
+            "position_updated"
+          );
+          setNotifications((prev) => [...newNotifications, ...prev]);
+        }
+      }
     }
   }, [userQueue]);
 
-  // Add appointment reminders
+  // Listen for queue being left
   useEffect(() => {
-    appointments.forEach((appointment) => {
-      const appointmentDate = new Date(appointment.date);
-      const now = new Date();
-      const timeDiff = appointmentDate.getTime() - now.getTime();
-      const hoursDiff = timeDiff / (1000 * 3600);
+    const queueNotifications = notifications.filter(
+      (n) => n.linkedType === "queue"
+    );
 
-      // Add reminder if appointment is within 24 hours
-      if (hoursDiff > 0 && hoursDiff <= 24) {
-        const reminderNotification = {
-          id: Date.now() + appointment.id,
-          type: "appointment_reminder",
-          title: "Upcoming Appointment",
-          message: `Your appointment at ${appointment.clinicName} is ${
-            hoursDiff < 1
-              ? "in less than an hour"
-              : `in ${Math.round(hoursDiff)} hours`
-          }.`,
-          timestamp: new Date(),
-          read: false,
-          priority: hoursDiff < 2 ? "high" : "normal",
-        };
+    if (!userQueue && queueNotifications.length > 0) {
+      // User left queue, get the last queue they were in
+      const lastQueueNotification = queueNotifications.sort(
+        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+      )[0];
 
-        setNotifications((prev) => {
-          const exists = prev.some(
-            (n) =>
-              n.type === "appointment_reminder" &&
-              n.message.includes(appointment.clinicName)
-          );
-
-          if (!exists) {
-            return [reminderNotification, ...prev];
-          }
-          return prev;
-        });
+      if (lastQueueNotification?.actionData) {
+        const newNotifications = generateQueueNotifications(
+          lastQueueNotification.actionData,
+          "left"
+        );
+        setNotifications((prev) => [...newNotifications, ...prev]);
       }
-    });
-  }, [appointments]);
+    }
+  }, [userQueue === null]);
 
   const markAsRead = (notificationId) => {
     setNotifications((prev) =>
@@ -162,6 +326,21 @@ export const useNotifications = () => {
     ]);
   };
 
+  // Method to manually trigger appointment notifications (for testing)
+  const triggerAppointmentNotification = (appointment, action = "created") => {
+    const newNotifications = generateAppointmentNotifications(
+      appointment,
+      action
+    );
+    setNotifications((prev) => [...newNotifications, ...prev]);
+  };
+
+  // Method to manually trigger queue notifications (for testing)
+  const triggerQueueNotification = (queue, action = "joined") => {
+    const newNotifications = generateQueueNotifications(queue, action);
+    setNotifications((prev) => [...newNotifications, ...prev]);
+  };
+
   return {
     notifications,
     unreadCount,
@@ -169,5 +348,7 @@ export const useNotifications = () => {
     markAllAsRead,
     deleteNotification,
     addNotification,
+    triggerAppointmentNotification,
+    triggerQueueNotification,
   };
 };
