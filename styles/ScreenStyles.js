@@ -1153,4 +1153,155 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
     letterSpacing: 0.2,
   },
+  refreshSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    marginTop: 8,
+  },
+
+  refreshButton: {
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
+  refreshButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  refreshIconContainer: {
+    marginRight: 8,
+    padding: 2,
+  },
+
+  refreshText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#667eea",
+    letterSpacing: 0.3,
+  },
+
+  // Enhanced Status Badge Styles
+  appointmentStatusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+
+  statusIconContainer: {
+    marginRight: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  appointmentStatusText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0, 0, 0, 0.1)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
+  },
+
+  // Enhanced Section Header Styles
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+
+  sectionCountContainer: {
+    backgroundColor: "#667eea",
+    borderRadius: 16,
+    minWidth: 28,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#667eea",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
+  sectionCount: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#fff",
+    textAlign: "center",
+    letterSpacing: 0.3,
+  },
+
+  // Enhanced appointment card elements
+  appointmentPatient: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+    marginBottom: 2,
+  },
+
+  appointmentPatientText: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginLeft: 6,
+    fontWeight: "500",
+  },
+
+  appointmentNotes: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginTop: 6,
+    maxWidth: "90%",
+  },
+
+  appointmentNotesText: {
+    fontSize: 13,
+    color: "#6B7280",
+    marginLeft: 6,
+    fontStyle: "italic",
+    lineHeight: 18,
+  },
+
+  // Loading container styles
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 100,
+  },
+
+  loadingText: {
+    fontSize: 16,
+    color: "#6B7280",
+    fontWeight: "500",
+  },
 });

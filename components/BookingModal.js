@@ -14,6 +14,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useApp } from "../context/AppContext";
+import { appointmentsService } from "../services/appointmentsService";
 import { styles } from "../styles/ComponentStyles";
 
 export const BookingModal = ({ visible, onClose }) => {
@@ -23,6 +24,8 @@ export const BookingModal = ({ visible, onClose }) => {
     setBookingFormData,
     appointments,
     setAppointments,
+    userId,
+    refreshAppointments,
   } = useApp();
 
   // Date/Time Picker States
@@ -32,6 +35,7 @@ export const BookingModal = ({ visible, onClose }) => {
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [notes, setNotes] = useState("");
   const [showTimeSlots, setShowTimeSlots] = useState(false);
+  const [patientName, setPatientName] = useState(""); // Add patient name state
 
   // Available time slots - you can make this dynamic based on clinic availability
   const getAvailableTimeSlots = () => {
@@ -83,6 +87,10 @@ export const BookingModal = ({ visible, onClose }) => {
   };
 
   const validateForm = () => {
+    if (!patientName.trim()) {
+      Alert.alert("❌ Missing Name", "Please enter the patient's name");
+      return false;
+    }
     if (!bookingFormData.service) {
       Alert.alert(
         "❌ Missing Service",
@@ -131,37 +139,56 @@ export const BookingModal = ({ visible, onClose }) => {
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const newAppointment = {
-      id: Date.now(),
-      clinicId: selectedClinic.id,
-      clinicName: selectedClinic.name,
-      date: bookingFormData.date,
-      time: bookingFormData.time,
-      service: bookingFormData.service,
-      notes: notes.trim(),
-      status: "confirmed",
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      // Create appointment data
+      const appointmentData = {
+        clinicName: selectedClinic.name,
+        clinicId: selectedClinic.id,
+        patientName: patientName.trim(),
+        service: bookingFormData.service,
+        date: bookingFormData.date,
+        time: bookingFormData.time,
+        notes: notes.trim(),
+        status: "confirmed",
+      };
 
-    setAppointments([...appointments, newAppointment]);
-    onClose();
-    setBookingFormData({ date: "", time: "", service: "" });
-    setNotes("");
+      // Save to Firebase
+      const newAppointment = await appointmentsService.addAppointment(
+        appointmentData,
+        userId
+      );
 
-    Alert.alert(
-      "🎉 Appointment Booked!",
-      `Your appointment has been confirmed!\n\n📅 Date: ${formatDisplayDate(
-        bookingFormData.date
-      )}\n🕐 Time: ${formatDisplayTime(bookingFormData.time)}\n🏥 Clinic: ${
-        selectedClinic.name
-      }\n💊 Service: ${
-        bookingFormData.service
-      }\n\n📱 You'll receive a confirmation SMS shortly.`,
-      [{ text: "Great!" }]
-    );
+      // Refresh appointments from Firebase
+      await refreshAppointments();
+
+      // Reset form and close
+      onClose();
+      setBookingFormData({ date: "", time: "", service: "" });
+      setNotes("");
+      setPatientName("");
+
+      Alert.alert(
+        "🎉 Appointment Booked!",
+        `Your appointment has been confirmed!\n\n📅 Date: ${formatDisplayDate(
+          bookingFormData.date
+        )}\n🕐 Time: ${formatDisplayTime(bookingFormData.time)}\n🏥 Clinic: ${
+          selectedClinic.name
+        }\n💊 Service: ${
+          bookingFormData.service
+        }\n\n📱 You'll receive a confirmation SMS shortly.`,
+        [{ text: "Great!" }]
+      );
+    } catch (error) {
+      Alert.alert(
+        "❌ Booking Failed",
+        "Unable to book appointment. Please try again.",
+        [{ text: "OK" }]
+      );
+      console.error("Booking error:", error);
+    }
   };
 
   const handleServiceSelect = () => {
@@ -209,7 +236,7 @@ export const BookingModal = ({ visible, onClose }) => {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 60); // 2 months ahead
     return maxDate;
-  }; // Continue the BookingModal component - Part 2
+  };
 
   return (
     <Modal
@@ -261,6 +288,23 @@ export const BookingModal = ({ visible, onClose }) => {
           {/* Form Section */}
           <View style={styles.formSection}>
             <Text style={styles.formSectionTitle}>Appointment Details</Text>
+
+            {/* Patient Name */}
+            <View style={styles.modernInputGroup}>
+              <Text style={styles.modernInputLabel}>
+                Patient Name <Text style={styles.requiredAsterisk}>*</Text>
+              </Text>
+              <View style={styles.inputWithIcon}>
+                <Ionicons name="person-outline" size={20} color="#667eea" />
+                <TextInput
+                  style={styles.modernModalInput}
+                  placeholder="Enter patient name"
+                  placeholderTextColor="#9CA3AF"
+                  value={patientName}
+                  onChangeText={setPatientName}
+                />
+              </View>
+            </View>
 
             {/* Service Selection */}
             <View style={styles.modernInputGroup}>
@@ -463,7 +507,8 @@ export const BookingModal = ({ visible, onClose }) => {
             <TouchableOpacity
               style={[
                 styles.modernConfirmButton,
-                (!bookingFormData.service ||
+                (!patientName.trim() ||
+                  !bookingFormData.service ||
                   !bookingFormData.date ||
                   !bookingFormData.time) &&
                   styles.disabledConfirmButton,
@@ -471,6 +516,7 @@ export const BookingModal = ({ visible, onClose }) => {
               onPress={handleSubmit}
               activeOpacity={0.8}
               disabled={
+                !patientName.trim() ||
                 !bookingFormData.service ||
                 !bookingFormData.date ||
                 !bookingFormData.time
@@ -478,6 +524,7 @@ export const BookingModal = ({ visible, onClose }) => {
             >
               <LinearGradient
                 colors={
+                  !patientName.trim() ||
                   !bookingFormData.service ||
                   !bookingFormData.date ||
                   !bookingFormData.time
@@ -492,6 +539,7 @@ export const BookingModal = ({ visible, onClose }) => {
                   name="checkmark-circle"
                   size={20}
                   color={
+                    !patientName.trim() ||
                     !bookingFormData.service ||
                     !bookingFormData.date ||
                     !bookingFormData.time
@@ -502,7 +550,8 @@ export const BookingModal = ({ visible, onClose }) => {
                 <Text
                   style={[
                     styles.modernConfirmText,
-                    (!bookingFormData.service ||
+                    (!patientName.trim() ||
+                      !bookingFormData.service ||
                       !bookingFormData.date ||
                       !bookingFormData.time) &&
                       styles.disabledConfirmText,
