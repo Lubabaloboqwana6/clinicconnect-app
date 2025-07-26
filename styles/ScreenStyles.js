@@ -1304,4 +1304,531 @@ export const styles = StyleSheet.create({
     color: "#6B7280",
     fontWeight: "500",
   },
+  // Real-time Connection Status Styles
+  connectionStatus: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+
+  connectionIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  connectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+  },
+
+  connectionText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    letterSpacing: 0.2,
+  },
+
+  lastUpdatedText: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    fontWeight: "500",
+    letterSpacing: 0.3,
+  },
+
+  // Error Banner Styles
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEF2F2",
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    gap: 12,
+    elevation: 2,
+    shadowColor: "#DC2626",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  errorText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#DC2626",
+    fontWeight: "500",
+    lineHeight: 20,
+  },
+
+  retryText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#DC2626",
+    letterSpacing: 0.3,
+    textDecorationLine: "underline",
+  },
+
+  // Called Alert Animation Styles
+  calledAlert: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 8,
+    shadowColor: "#F59E0B",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+  },
+
+  calledAlertGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    gap: 12,
+  },
+
+  calledAlertText: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#fff",
+    textAlign: "center",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+
+  // Enhanced Queue Position Styles
+  positionChangeIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginTop: 12,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.3)",
+  },
+
+  positionChangeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#10B981",
+    letterSpacing: 0.3,
+  },
+
+  // Live Queue Statistics Styles
+  queueStatsContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+
+  queueStatsCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  queueStatItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+
+  queueStatNumber: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#667eea",
+    marginBottom: 4,
+    letterSpacing: -0.5,
+  },
+
+  queueStatLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "600",
+    textAlign: "center",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+
+  // Enhanced Personal Details with Better Visual Hierarchy
+  personalDetailsContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+
+  personalDetailsCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  personalDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F8FAFC",
+    backgroundColor: "#fff",
+  },
+
+  personalDetailIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#EEF2FF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+    elevation: 1,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+
+  personalDetailContent: {
+    flex: 1,
+  },
+
+  personalDetailLabel: {
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginBottom: 4,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+
+  personalDetailValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+    letterSpacing: -0.2,
+  },
+
+  // Enhanced Action Buttons with Better Spacing
+  queueActionsContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+    gap: 16,
+  },
+
+  updateDetailsButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EEF2FF",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "#E0E7FF",
+    elevation: 2,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  updateDetailsButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#667eea",
+    letterSpacing: 0.3,
+  },
+
+  leaveQueueButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FEF2F2",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    elevation: 2,
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  leaveQueueButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#EF4444",
+    letterSpacing: 0.3,
+  },
+
+  // Enhanced Empty State with Better Typography
+  emptyQueueState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 40,
+    paddingVertical: 80,
+    backgroundColor: "#FAFBFC",
+  },
+
+  emptyQueueIcon: {
+    marginBottom: 32,
+    padding: 24,
+    borderRadius: 40,
+    backgroundColor: "#F3F4F6",
+  },
+
+  emptyQueueTitle: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1F2937",
+    marginBottom: 16,
+    textAlign: "center",
+    letterSpacing: -0.5,
+  },
+
+  emptyQueueText: {
+    fontSize: 16,
+    color: "#6B7280",
+    textAlign: "center",
+    lineHeight: 26,
+    marginBottom: 40,
+    fontWeight: "500",
+    letterSpacing: 0.1,
+    maxWidth: 300,
+  },
+
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical: 24,
+    gap: 16,
+  },
+
+  loadingText: {
+    fontSize: 16,
+    color: "#6B7280",
+    fontWeight: "500",
+    letterSpacing: 0.2,
+  },
+
+  emptyQueueButton: {
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 6,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+  },
+
+  emptyQueueButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 18,
+    gap: 10,
+  },
+
+  emptyQueueButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: 0.3,
+  },
+
+  // Enhanced Queue Main Card with Better Visual Effects
+  queueMainCard: {
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 24,
+    borderRadius: 24,
+    overflow: "hidden",
+    elevation: 12,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+  },
+
+  queueMainGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 28,
+    position: "relative",
+  },
+
+  queueMainHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 28,
+  },
+
+  queueMainClinic: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#fff",
+    marginBottom: 6,
+    letterSpacing: -0.3,
+    textShadowColor: "rgba(0,0,0,0.1)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+
+  queueMainJoinTime: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "500",
+    letterSpacing: 0.2,
+  },
+
+  queueMainBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+
+  queueMainBadgeText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: 0.5,
+  },
+
+  queuePositionContainer: {
+    alignItems: "center",
+    marginBottom: 28,
+    position: "relative",
+  },
+
+  queuePositionNumber: {
+    fontSize: 64,
+    fontWeight: "900",
+    color: "#fff",
+    marginBottom: 4,
+    letterSpacing: -2,
+    textShadowColor: "rgba(0,0,0,0.2)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+
+  queuePositionLabel: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "600",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+
+  queueMainDetails: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.2)",
+  },
+
+  queueMainDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+    justifyContent: "center",
+  },
+
+  queueMainDetailText: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.95)",
+    fontWeight: "600",
+    letterSpacing: 0.2,
+  },
+
+  // Enhanced Section Titles
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 16,
+    letterSpacing: -0.3,
+  },
+
+  // Enhanced Screen Header
+  queueHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+
+  screenTitle: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: "#1F2937",
+    marginBottom: 8,
+    letterSpacing: -0.8,
+  },
+
+  screenSubtitle: {
+    fontSize: 16,
+    color: "#6B7280",
+    lineHeight: 24,
+    fontWeight: "500",
+    letterSpacing: 0.1,
+  },
 });

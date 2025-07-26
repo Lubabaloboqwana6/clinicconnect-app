@@ -1,3 +1,4 @@
+// context/AppContext.js - Enhanced with Firebase Queue Integration
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { appointmentsService } from "../services/appointmentsService";
@@ -18,8 +19,12 @@ export const AppProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Existing states
+  // Queue states with Firebase integration
   const [userQueue, setUserQueue] = useState(null);
+  const [queueLoading, setQueueLoading] = useState(false);
+  const [queueError, setQueueError] = useState(null);
+
+  // Existing states
   const [appointments, setAppointments] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,10 +40,27 @@ export const AppProvider = ({ children }) => {
     service: "",
   });
 
+  // Real-time listeners
+  const [queueUnsubscribe, setQueueUnsubscribe] = useState(null);
+
   // Initialize user and load data on mount
   useEffect(() => {
     initializeUser();
   }, []);
+
+  // Setup queue listener when userId changes
+  useEffect(() => {
+    if (userId) {
+      setupQueueListener();
+    }
+
+    // Cleanup on unmount or userId change
+    return () => {
+      if (queueUnsubscribe) {
+        queueUnsubscribe();
+      }
+    };
+  }, [userId]);
 
   const initializeUser = async () => {
     try {
@@ -49,16 +71,16 @@ export const AppProvider = ({ children }) => {
           .toString(36)
           .substr(2, 9)}`;
         await AsyncStorage.setItem("userId", storedUserId);
-        console.log("Created new user ID:", storedUserId);
+        console.log("✅ Created new user ID:", storedUserId);
       } else {
-        console.log("Retrieved existing user ID:", storedUserId);
+        console.log("✅ Retrieved existing user ID:", storedUserId);
       }
       setUserId(storedUserId);
 
       // Load user's data
       await loadUserData(storedUserId);
     } catch (error) {
-      console.error("Error initializing user:", error);
+      console.error("❌ Error initializing user:", error);
     } finally {
       setLoading(false);
     }
@@ -66,35 +88,219 @@ export const AppProvider = ({ children }) => {
 
   const loadUserData = async (userId) => {
     try {
+      console.log("🔄 Loading user data for:", userId);
+
       // Load appointments
       const userAppointments = await appointmentsService.getUserAppointments(
         userId
       );
       setAppointments(userAppointments);
 
-      // Load queue status
+      // Load initial queue status (one-time check)
       const queueStatus = await queueService.getUserQueueStatus(userId);
       setUserQueue(queueStatus);
+
+      console.log("✅ User data loaded:", {
+        appointments: userAppointments.length,
+        inQueue: !!queueStatus,
+      });
     } catch (error) {
-      console.error("Error loading user data:", error);
+      console.error("❌ Error loading user data:", error);
+    }
+  };
+
+  // Setup real-time queue listener
+  const setupQueueListener = () => {
+    if (!userId) return;
+
+    try {
+      console.log("📡 Setting up real-time queue listener for:", userId);
+
+      const unsubscribe = queueService.subscribeToUserQueue(
+        userId,
+        (queueData) => {
+          console.log(
+            "📡 Queue update received:",
+            queueData ? "In queue" : "Not in queue"
+          );
+          setUserQueue(queueData);
+          setQueueError(null); // Clear any previous errors
+        }
+      );
+
+      setQueueUnsubscribe(() => unsubscribe);
+    } catch (error) {
+      console.error("❌ Error setting up queue listener:", error);
+      setQueueError("Failed to connect to queue updates");
+    }
+  };
+
+  // Enhanced queue management functions
+
+  // Join queue with comprehensive error handling
+  const joinQueue = async (clinicData, userDetails) => {
+    if (!userId) {
+      throw new Error("User not initialized");
+    }
+
+    setQueueLoading(true);
+    setQueueError(null);
+
+    try {
+      console.log("🔄 Joining queue:", clinicData.name);
+
+      // Check clinic availability first
+      const availability = await queueService.isClinicAvailable(clinicData.id);
+      if (!availability.available) {
+        throw new Error(availability.reason || "Clinic is not available");
+      }
+
+      // Join the queue
+      const queueData = await queueService.joinQueue(
+        clinicData,
+        userDetails,
+        userId
+      );
+
+      // Update local state (real-time listener will also update this)
+      setUserQueue(queueData);
+
+      // Clear form data
+      setQueueFormData({ name: "", idNumber: "", phoneNumber: "" });
+
+      console.log("✅ Successfully joined queue");
+      return queueData;
+    } catch (error) {
+      console.error("❌ Error joining queue:", error);
+      setQueueError(error.message);
+      throw error;
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
+  // Leave queue with confirmation
+  const leaveQueue = async () => {
+    if (!userQueue) {
+      console.log("ℹ️ No queue to leave");
+      return;
+    }
+
+    setQueueLoading(true);
+    setQueueError(null);
+
+    try {
+      console.log("🔄 Leaving queue:", userQueue.clinicName);
+
+      await queueService.leaveQueue(userQueue.id);
+
+      // Update local state immediately
+      setUserQueue(null);
+
+      console.log("✅ Successfully left queue");
+    } catch (error) {
+      console.error("❌ Error leaving queue:", error);
+      setQueueError(error.message);
+      throw error;
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
+  // Update queue details
+  const updateQueueDetails = async (updates) => {
+    if (!userQueue) {
+      throw new Error("Not currently in queue");
+    }
+
+    setQueueLoading(true);
+    setQueueError(null);
+
+    try {
+      console.log("🔄 Updating queue details");
+
+      await queueService.updateQueueDetails(userQueue.id, updates);
+
+      // Update local state with new details
+      setUserQueue((prev) => ({
+        ...prev,
+        ...updates,
+        userDetails: {
+          ...prev.userDetails,
+          ...updates,
+        },
+      }));
+
+      console.log("✅ Queue details updated");
+    } catch (error) {
+      console.error("❌ Error updating queue details:", error);
+      setQueueError(error.message);
+      throw error;
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
+  // Get clinic queue stats
+  const getClinicQueueStats = async (clinicId) => {
+    try {
+      return await queueService.getClinicQueueStats(clinicId);
+    } catch (error) {
+      console.error("❌ Error getting clinic stats:", error);
+      return {
+        total: 0,
+        waiting: 0,
+        called: 0,
+        estimatedWait: "Unknown",
+      };
+    }
+  };
+
+  // Check if user can join a specific clinic queue
+  const canJoinClinicQueue = async (clinicId) => {
+    try {
+      // User can't join if already in a queue
+      if (userQueue) {
+        return {
+          canJoin: false,
+          reason: "Already in a queue",
+          currentClinic: userQueue.clinicName,
+        };
+      }
+
+      // Check clinic availability
+      const availability = await queueService.isClinicAvailable(clinicId);
+      return {
+        canJoin: availability.available,
+        reason: availability.reason,
+        currentQueue: availability.currentQueue,
+        estimatedWait: availability.estimatedWait,
+      };
+    } catch (error) {
+      console.error("❌ Error checking if can join queue:", error);
+      return {
+        canJoin: false,
+        reason: "Unable to check queue availability",
+      };
     }
   };
 
   // Refresh appointments
   const refreshAppointments = async () => {
     if (!userId) return;
+
     try {
       const userAppointments = await appointmentsService.getUserAppointments(
         userId
       );
       setAppointments(userAppointments);
-      console.log(`Refreshed ${userAppointments.length} appointments`);
+      console.log(`✅ Refreshed ${userAppointments.length} appointments`);
     } catch (error) {
-      console.error("Error refreshing appointments:", error);
+      console.error("❌ Error refreshing appointments:", error);
     }
   };
 
-  // Add appointment using Firebase
+  // Enhanced appointment functions
   const addAppointment = async (appointmentData) => {
     try {
       const newAppointment = await appointmentsService.addAppointment(
@@ -107,45 +313,41 @@ export const AppProvider = ({ children }) => {
 
       return newAppointment;
     } catch (error) {
-      console.error("Failed to add appointment:", error);
+      console.error("❌ Failed to add appointment:", error);
       throw error;
     }
   };
 
-  // Update appointment
   const updateAppointment = async (appointmentId, updates) => {
     try {
       await appointmentsService.updateAppointment(appointmentId, updates);
       await refreshAppointments();
     } catch (error) {
-      console.error("Failed to update appointment:", error);
+      console.error("❌ Failed to update appointment:", error);
       throw error;
     }
   };
 
-  // Delete appointment
   const deleteAppointment = async (appointmentId) => {
     try {
       await appointmentsService.deleteAppointment(appointmentId);
       await refreshAppointments();
     } catch (error) {
-      console.error("Failed to delete appointment:", error);
+      console.error("❌ Failed to delete appointment:", error);
       throw error;
     }
   };
 
-  // Cancel appointment
   const cancelAppointment = async (appointmentId) => {
     try {
       await appointmentsService.cancelAppointment(appointmentId);
       await refreshAppointments();
     } catch (error) {
-      console.error("Failed to cancel appointment:", error);
+      console.error("❌ Failed to cancel appointment:", error);
       throw error;
     }
   };
 
-  // Reschedule appointment
   const rescheduleAppointment = async (appointmentId, newDate, newTime) => {
     try {
       await appointmentsService.rescheduleAppointment(
@@ -155,108 +357,44 @@ export const AppProvider = ({ children }) => {
       );
       await refreshAppointments();
     } catch (error) {
-      console.error("Failed to reschedule appointment:", error);
+      console.error("❌ Failed to reschedule appointment:", error);
       throw error;
     }
   };
 
-  // Check in appointment
   const checkInAppointment = async (appointmentId) => {
     try {
       await updateAppointment(appointmentId, { status: "Checked-In" });
     } catch (error) {
-      console.error("Failed to check in appointment:", error);
+      console.error("❌ Failed to check in appointment:", error);
       throw error;
     }
   };
 
-  // Queue management functions
+  // Legacy compatibility functions (for dashboard)
   const addWalkInToQueue = async (walkInData) => {
-    try {
-      let queueData;
-
-      if (typeof walkInData === "string") {
-        // Old format compatibility
-        queueData = {
-          patientName: `${walkInData} (Walk-in)`,
-          type: "walk-in",
-          status: "Waiting",
-          notified: false,
-        };
-      } else {
-        // New enhanced format
-        queueData = {
-          patientName: walkInData.fullName,
-          idNumber: walkInData.idNumber,
-          phoneNumber: walkInData.phoneNumber,
-          reasonForVisit: walkInData.reasonForVisit,
-          type: "walk-in",
-          status: "Waiting",
-          notified: false,
-        };
-      }
-
-      const newQueueItem = await queueService.joinQueue(
-        selectedQueueClinic,
-        queueData,
-        userId
-      );
-
-      setUserQueue(newQueueItem);
-      return newQueueItem;
-    } catch (error) {
-      console.error("Failed to add walk-in to queue:", error);
-      throw error;
-    }
-  };
-
-  const joinQueue = async () => {
-    try {
-      if (!selectedQueueClinic) throw new Error("No clinic selected");
-
-      const queueData = await queueService.joinQueue(
-        selectedQueueClinic,
-        queueFormData,
-        userId
-      );
-
-      setUserQueue(queueData);
-      setQueueFormData({ name: "", idNumber: "", phoneNumber: "" });
-
-      return queueData;
-    } catch (error) {
-      console.error("Failed to join queue:", error);
-      throw error;
-    }
-  };
-
-  const leaveQueue = async () => {
-    try {
-      if (!userQueue) return;
-
-      await queueService.leaveQueue(userQueue.id);
-      setUserQueue(null);
-    } catch (error) {
-      console.error("Failed to leave queue:", error);
-      throw error;
-    }
+    console.log(
+      "ℹ️ addWalkInToQueue is a dashboard function in mobile context"
+    );
+    return null;
   };
 
   const callNextInQueue = async () => {
-    // This would typically be handled by the dashboard, not the mobile app
-    console.log("Call next in queue is a dashboard function");
+    console.log("ℹ️ callNextInQueue is a dashboard function");
+    return null;
   };
 
   const completeQueueMember = async (patientId) => {
-    // This would typically be handled by the dashboard, not the mobile app
-    console.log("Complete queue member is a dashboard function");
+    console.log("ℹ️ completeQueueMember is a dashboard function");
+    return null;
   };
 
   const notifyPatient = async (patientId) => {
-    // This would typically be handled by the dashboard, not the mobile app
-    console.log("Notify patient is a dashboard function");
+    console.log("ℹ️ notifyPatient is a dashboard function");
+    return null;
   };
 
+  // Analytics function
   const getAnalytics = () => {
     const today = new Date().toISOString().split("T")[0];
     return {
@@ -299,11 +437,21 @@ export const AppProvider = ({ children }) => {
           .length,
       },
       queueMetrics: {
-        averageWaitTime: "15 min",
+        averageWaitTime: userQueue ? userQueue.estimatedWait : "N/A",
         totalServed: 0,
         currentWaiting: userQueue ? 1 : 0,
       },
     };
+  };
+
+  // Cleanup function
+  const cleanup = () => {
+    if (userId) {
+      queueService.cleanup(userId);
+    }
+    if (queueUnsubscribe) {
+      queueUnsubscribe();
+    }
   };
 
   const value = {
@@ -311,9 +459,20 @@ export const AppProvider = ({ children }) => {
     userId,
     loading,
 
-    // Data
-    appointments,
+    // Queue data and states
     userQueue,
+    queueLoading,
+    queueError,
+
+    // Other data
+    appointments,
+
+    // Enhanced queue functions
+    joinQueue,
+    leaveQueue,
+    updateQueueDetails,
+    getClinicQueueStats,
+    canJoinClinicQueue,
 
     // Appointment functions
     addAppointment,
@@ -324,13 +483,11 @@ export const AppProvider = ({ children }) => {
     rescheduleAppointment,
     refreshAppointments,
 
-    // Queue functions
+    // Legacy compatibility (dashboard functions)
     addWalkInToQueue,
     callNextInQueue,
     completeQueueMember,
     notifyPatient,
-    joinQueue,
-    leaveQueue,
 
     // Existing state and setters
     setUserQueue,
@@ -348,6 +505,7 @@ export const AppProvider = ({ children }) => {
 
     // Utility functions
     getAnalytics,
+    cleanup,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
