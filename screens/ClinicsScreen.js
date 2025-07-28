@@ -1,17 +1,20 @@
-// screens/ClinicsScreen.js - Redesigned clinics screen
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
+  Alert,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Header } from "../components/Header";
 import { ClinicCard } from "../components/ClinicCard";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { ErrorMessage } from "../components/ErrorMessage";
 import { useApp } from "../context/AppContext";
-import { mockClinics } from "../data/mockData";
+import { clinicsService } from "../services/clinicsService";
 import { styles } from "../styles/ScreenStyles";
 
 export const ClinicsScreen = ({
@@ -26,11 +29,74 @@ export const ClinicsScreen = ({
     setSelectedQueueClinic,
   } = useApp();
 
+  // Local state for Firebase clinics
+  const [clinics, setClinics] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Load clinics on component mount
+  useEffect(() => {
+    loadClinics();
+  }, []);
+
+  const loadClinics = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Initialize sample clinics if collection is empty
+      await clinicsService.initializeClinicsIfEmpty();
+
+      // Load all clinics from Firebase
+      const firebaseClinics = await clinicsService.getAllClinics();
+
+      // Transform Firebase clinics to match the expected format
+      const transformedClinics = firebaseClinics.map((clinic) => ({
+        id: clinic.id,
+        name: clinic.name,
+        address: clinic.address,
+        distance: clinic.distanceText || "Unknown",
+        currentQueue: clinic.currentQueue || 0,
+        estimatedWait: clinic.estimatedWait || 0,
+        services: clinic.services || [],
+        hours: clinic.hours || "Unknown",
+        phone: clinic.phone || "",
+        coordinates: clinic.coordinates,
+        isOpen: clinic.isOpen !== false, // Default to true if not specified
+        maxQueueSize: clinic.maxQueueSize || 50,
+      }));
+
+      setClinics(transformedClinics);
+      console.log(
+        `✅ Loaded ${transformedClinics.length} clinics from Firebase`
+      );
+    } catch (error) {
+      console.error("❌ Error loading clinics:", error);
+      setError("Failed to load clinics. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadClinics();
+    setRefreshing(false);
+  };
+
+  const handleRetry = () => {
+    loadClinics();
+  };
+
   // Filter clinics based on search
-  const filteredClinics = mockClinics.filter(
+  const filteredClinics = clinics.filter(
     (clinic) =>
       clinic.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      clinic.address.toLowerCase().includes(searchQuery.toLowerCase())
+      clinic.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      clinic.services.some((service) =>
+        service.toLowerCase().includes(searchQuery.toLowerCase())
+      )
   );
 
   const handleJoinQueue = (clinic) => {
@@ -42,6 +108,63 @@ export const ClinicsScreen = ({
     setSelectedClinic(clinic);
     onShowBookingModal();
   };
+
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+
+    if (query.trim().length > 2) {
+      try {
+        // Search in Firebase for better results
+        const searchResults = await clinicsService.searchClinics(query);
+        const transformedResults = searchResults.map((clinic) => ({
+          id: clinic.id,
+          name: clinic.name,
+          address: clinic.address,
+          distance: clinic.distanceText || "Unknown",
+          currentQueue: clinic.currentQueue || 0,
+          estimatedWait: clinic.estimatedWait || 0,
+          services: clinic.services || [],
+          hours: clinic.hours || "Unknown",
+          phone: clinic.phone || "",
+          coordinates: clinic.coordinates,
+          isOpen: clinic.isOpen !== false,
+          maxQueueSize: clinic.maxQueueSize || 50,
+        }));
+        setClinics(transformedResults);
+      } catch (error) {
+        console.error("❌ Search error:", error);
+        // Fall back to local filtering if search fails
+      }
+    } else if (query.trim().length === 0) {
+      // Reload all clinics when search is cleared
+      loadClinics();
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Header title="Find Clinics" onNavigate={onNavigate} />
+        <LoadingSpinner message="Loading clinics..." showGradient={true} />
+      </View>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Header title="Find Clinics" onNavigate={onNavigate} />
+        <ErrorMessage
+          message={error}
+          onRetry={handleRetry}
+          title="Failed to Load Clinics"
+          icon="medical-outline"
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -59,11 +182,16 @@ export const ClinicsScreen = ({
             <Ionicons name="search" size={20} color="#6B7280" />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search clinics by name or location..."
+              placeholder="Search clinics by name, location, or service..."
               placeholderTextColor="#9CA3AF"
               value={searchQuery}
-              onChangeText={setSearchQuery}
+              onChangeText={handleSearch}
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => handleSearch("")}>
+                <Ionicons name="close-circle" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            )}
           </View>
           <TouchableOpacity style={styles.filterButton}>
             <Ionicons name="options" size={20} color="#667eea" />
@@ -74,9 +202,26 @@ export const ClinicsScreen = ({
       {/* Results Summary */}
       <View style={styles.resultsHeader}>
         <Text style={styles.resultsText}>
-          {filteredClinics.length} clinics found
+          {filteredClinics.length} clinic
+          {filteredClinics.length !== 1 ? "s" : ""} found
         </Text>
-        <TouchableOpacity style={styles.sortButton}>
+        <TouchableOpacity
+          style={styles.sortButton}
+          onPress={() => {
+            Alert.alert("Sort Options", "Choose how to sort clinics:", [
+              {
+                text: "By Distance",
+                onPress: () => console.log("Sort by distance"),
+              },
+              {
+                text: "By Queue Size",
+                onPress: () => console.log("Sort by queue"),
+              },
+              { text: "By Name", onPress: () => console.log("Sort by name") },
+              { text: "Cancel", style: "cancel" },
+            ]);
+          }}
+        >
           <Ionicons name="swap-vertical" size={16} color="#6B7280" />
           <Text style={styles.sortText}>Sort by distance</Text>
         </TouchableOpacity>
@@ -85,15 +230,82 @@ export const ClinicsScreen = ({
       <ScrollView
         style={styles.clinicsContainer}
         showsVerticalScrollIndicator={false}
-      >
-        {filteredClinics.map((clinic) => (
-          <ClinicCard
-            key={clinic.id}
-            clinic={clinic}
-            onJoinQueue={handleJoinQueue}
-            onBookAppointment={handleBookAppointment}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#667eea"]}
+            tintColor="#667eea"
           />
-        ))}
+        }
+      >
+        {filteredClinics.length > 0 ? (
+          filteredClinics.map((clinic) => (
+            <ClinicCard
+              key={clinic.id}
+              clinic={clinic}
+              onJoinQueue={handleJoinQueue}
+              onBookAppointment={handleBookAppointment}
+            />
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <View style={styles.emptyStateIcon}>
+              <Ionicons name="search-outline" size={64} color="#D1D5DB" />
+            </View>
+            <Text style={styles.emptyStateTitle}>
+              {searchQuery ? "No Clinics Found" : "No Clinics Available"}
+            </Text>
+            <Text style={styles.emptyStateText}>
+              {searchQuery
+                ? `No clinics match "${searchQuery}". Try a different search term.`
+                : "Unable to load clinics at the moment. Please check your connection and try again."}
+            </Text>
+            {searchQuery && (
+              <TouchableOpacity
+                style={styles.emptyStateButton}
+                onPress={() => handleSearch("")}
+              >
+                <Text style={styles.emptyStateButtonText}>Clear Search</Text>
+              </TouchableOpacity>
+            )}
+            {!searchQuery && (
+              <TouchableOpacity
+                style={styles.emptyStateButton}
+                onPress={handleRetry}
+              >
+                <Text style={styles.emptyStateButtonText}>Retry</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* Add Clinic Button (for testing) */}
+        {__DEV__ && (
+          <View style={{ padding: 20, marginTop: 20 }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#667eea",
+                borderRadius: 12,
+                paddingVertical: 16,
+                alignItems: "center",
+              }}
+              onPress={async () => {
+                try {
+                  await clinicsService.addSampleClinics();
+                  Alert.alert("Success", "Sample clinics added!");
+                  loadClinics();
+                } catch (error) {
+                  Alert.alert("Error", "Failed to add sample clinics");
+                }
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "600" }}>
+                🏥 Add Sample Clinics (Dev Only)
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Bottom spacing */}
         <View style={{ height: 100 }} />

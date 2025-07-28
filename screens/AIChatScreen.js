@@ -17,6 +17,7 @@ import { ChatMessage } from "../components/ChatMessage";
 import { QuickReply } from "../components/QuickReply";
 import { TypingIndicator } from "../components/TypingIndicator";
 import { useApp } from "../context/AppContext";
+import { geminiService } from "../services/geminiService"; // Import Gemini service
 import { styles } from "../styles/ScreenStyles";
 
 const { height } = Dimensions.get("window");
@@ -25,7 +26,7 @@ export const AIChatScreen = ({ onNavigate }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI Health Assistant. 👋\n\nHow are you feeling today? I'm here to help with any health questions or concerns you might have.",
+      text: "Hello! I'm your AI Health Assistant powered by Google Gemini. 👋\n\nI'm here to help with health questions, guide you to appropriate care, and assist with using ClinicConnect+. How are you feeling today?",
       isBot: true,
       timestamp: new Date(),
       type: "greeting",
@@ -33,6 +34,7 @@ export const AIChatScreen = ({ onNavigate }) => {
   ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState("checking"); // checking, connected, error
   const scrollViewRef = useRef(null);
 
   const quickReplies = [
@@ -42,13 +44,48 @@ export const AIChatScreen = ({ onNavigate }) => {
     { id: 4, text: "Stomach pain", icon: "body-outline" },
     { id: 5, text: "Find nearby clinics", icon: "location-outline" },
     { id: 6, text: "Book appointment", icon: "calendar-outline" },
+    { id: 7, text: "Health tips", icon: "heart-outline" },
+    { id: 8, text: "Emergency help", icon: "warning-outline" },
   ];
 
   const [currentQuickReplies, setCurrentQuickReplies] = useState(quickReplies);
 
+  // Test Gemini connection on component mount
+  useEffect(() => {
+    testAIConnection();
+  }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const testAIConnection = async () => {
+    try {
+      setConnectionStatus("checking");
+      const result = await geminiService.testConnection();
+
+      if (result.success) {
+        setConnectionStatus("connected");
+        console.log("✅ Gemini AI service connected successfully");
+      } else {
+        setConnectionStatus("error");
+        console.warn("⚠️ Gemini AI service connection failed:", result.message);
+
+        // Add a system message about fallback mode
+        const fallbackMessage = {
+          id: Date.now(),
+          text: "🤖 I'm running in offline mode right now, but I can still help you navigate the app and provide basic health guidance. How can I assist you?",
+          isBot: true,
+          timestamp: new Date(),
+          type: "system",
+        };
+        setMessages((prev) => [...prev, fallbackMessage]);
+      }
+    } catch (error) {
+      setConnectionStatus("error");
+      console.error("❌ Error testing Gemini AI connection:", error);
+    }
+  };
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -70,115 +107,91 @@ export const AIChatScreen = ({ onNavigate }) => {
     setInputText("");
     setIsTyping(true);
 
-    // Simulate AI response (replace with actual AI integration)
-    setTimeout(() => {
-      const botResponse = generateBotResponse(text.trim());
+    try {
+      // Generate AI response using Gemini service
+      const botResponse = await geminiService.generateResponse(
+        messages,
+        text.trim()
+      );
+
+      // Add the response to messages
       setMessages((prev) => [...prev, botResponse]);
+
+      // Update quick replies based on the conversation context
+      updateQuickReplies(text.trim(), botResponse);
+    } catch (error) {
+      console.error("❌ Error generating Gemini AI response:", error);
+
+      // Add error message
+      const errorMessage = {
+        id: Date.now(),
+        text: "I'm sorry, I'm having trouble responding right now. 😔 Let me help you find what you need instead!",
+        isBot: true,
+        timestamp: new Date(),
+        type: "error",
+        actions: [
+          { text: "Find Clinics", action: "navigate", target: "clinics" },
+          { text: "Emergency Help", action: "emergency" },
+        ],
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-      updateQuickReplies(text.trim());
-    }, 1500);
-  };
-
-  const generateBotResponse = (userInput) => {
-    const input = userInput.toLowerCase();
-    let response = "";
-    let type = "text";
-    let actions = [];
-
-    if (input.includes("headache") || input.includes("head")) {
-      response =
-        "I understand you're experiencing a headache. 🤕 Let me help you assess this:\n\n• When did it start?\n• How would you rate the pain (1-10)?\n• Any other symptoms like nausea or sensitivity to light?\n\n💡 For persistent or severe headaches, I recommend seeing a healthcare provider.";
-      actions = [
-        { text: "Find nearby clinics", action: "navigate", target: "clinics" },
-        { text: "It's severe pain", action: "escalate" },
-      ];
-    } else if (input.includes("fever") || input.includes("temperature")) {
-      response =
-        "Fever can be concerning. 🌡️ Here's what I need to know:\n\n• What's your temperature?\n• How long have you had it?\n• Any other symptoms (chills, body aches, etc.)?\n\n🚨 **Important**: If your fever is over 39°C (102°F) or you have difficulty breathing, seek immediate medical attention.";
-      type = "urgent";
-      actions = [
-        { text: "Call emergency", action: "emergency" },
-        { text: "Find clinics", action: "navigate", target: "clinics" },
-      ];
-    } else if (input.includes("stomach") || input.includes("pain")) {
-      response =
-        "Stomach pain can have various causes. 🤢 Let me help you:\n\n• Where exactly is the pain located?\n• When did it start?\n• Any nausea, vomiting, or changes in appetite?\n• Rate the pain intensity (1-10)?\n\nI can help you find appropriate care based on your symptoms.";
-      actions = [
-        { text: "It's getting worse", action: "escalate" },
-        { text: "Book appointment", action: "navigate", target: "clinics" },
-      ];
-    } else if (
-      input.includes("clinic") ||
-      input.includes("find") ||
-      input.includes("nearby")
-    ) {
-      response =
-        "I can help you find nearby clinics! 🏥 Based on your location, I'll show you the closest healthcare facilities with:\n\n• Current wait times\n• Available services\n• Contact information\n• Real-time queue status";
-      actions = [
-        { text: "Show clinics", action: "navigate", target: "clinics" },
-      ];
-    } else if (input.includes("appointment") || input.includes("book")) {
-      response =
-        "I'll help you book an appointment! 📅 You can:\n\n• Choose from available clinics\n• Select preferred time slots\n• Pick the right service\n• Get confirmation details\n\nLet me connect you to our booking system.";
-      actions = [{ text: "Book now", action: "navigate", target: "clinics" }];
-    } else if (input.includes("unwell") || input.includes("sick")) {
-      response =
-        "I'm sorry to hear you're not feeling well. 😔 To provide you with the best guidance, could you tell me more about your specific symptoms?\n\n• What symptoms are you experiencing?\n• When did they start?\n• How severe are they?\n\nThis will help me give you better advice.";
-      actions = [{ text: "Describe symptoms", action: "continue" }];
-    } else if (input.includes("emergency") || input.includes("urgent")) {
-      response =
-        "🚨 **EMERGENCY GUIDANCE**\n\nIf you're experiencing a medical emergency, please:\n\n• Call 10177 (South African Emergency)\n• Go to your nearest emergency room\n• Don't delay seeking help\n\nFor non-emergency urgent care, I can help you find the nearest clinic.";
-      type = "urgent";
-      actions = [
-        { text: "Call emergency", action: "emergency" },
-        { text: "Find clinics", action: "navigate", target: "clinics" },
-      ];
-    } else {
-      response =
-        "Thank you for sharing that with me. 💭 To provide you with the best health guidance, could you tell me more about what's concerning you?\n\n• Are you experiencing any specific symptoms?\n• Is this about a general health question?\n• Do you need help finding healthcare services?\n\nI'm here to help!";
-      actions = [
-        { text: "I have symptoms", action: "continue" },
-        { text: "General question", action: "continue" },
-      ];
     }
-
-    return {
-      id: Date.now(),
-      text: response,
-      isBot: true,
-      timestamp: new Date(),
-      type,
-      actions,
-    };
   };
 
-  const updateQuickReplies = (userInput) => {
+  const updateQuickReplies = (userInput, botResponse) => {
     const input = userInput.toLowerCase();
     let newReplies = [];
 
-    if (input.includes("headache")) {
+    // Contextual quick replies based on conversation
+    if (input.includes("headache") || input.includes("head")) {
       newReplies = [
         { id: 1, text: "Mild headache", icon: "happy-outline" },
         { id: 2, text: "Severe pain", icon: "sad-outline" },
         { id: 3, text: "With nausea", icon: "medical-outline" },
-        { id: 4, text: "Find clinics", icon: "location-outline" },
+        { id: 4, text: "How long?", icon: "time-outline" },
+        { id: 5, text: "Find clinics", icon: "location-outline" },
       ];
-    } else if (input.includes("fever")) {
+    } else if (input.includes("fever") || input.includes("temperature")) {
       newReplies = [
-        { id: 1, text: "High fever", icon: "thermometer-outline" },
+        { id: 1, text: "High fever (>38.5°C)", icon: "thermometer" },
         { id: 2, text: "With chills", icon: "snow-outline" },
-        { id: 3, text: "Emergency help", icon: "medical-outline" },
-        { id: 4, text: "Find clinics", icon: "location-outline" },
+        { id: 3, text: "How long?", icon: "time-outline" },
+        { id: 4, text: "Emergency help", icon: "medical-outline" },
+        { id: 5, text: "Find clinics", icon: "location-outline" },
       ];
-    } else if (input.includes("stomach")) {
+    } else if (input.includes("stomach") || input.includes("nausea")) {
       newReplies = [
         { id: 1, text: "Severe pain", icon: "sad-outline" },
-        { id: 2, text: "With nausea", icon: "medical-outline" },
-        { id: 3, text: "Getting worse", icon: "trending-up-outline" },
-        { id: 4, text: "Book appointment", icon: "calendar-outline" },
+        { id: 2, text: "With vomiting", icon: "medical-outline" },
+        { id: 3, text: "How long?", icon: "time-outline" },
+        { id: 4, text: "Getting worse", icon: "trending-up-outline" },
+        { id: 5, text: "Book appointment", icon: "calendar-outline" },
+      ];
+    } else if (input.includes("clinic") || input.includes("appointment")) {
+      newReplies = [
+        { id: 1, text: "Find nearby clinics", icon: "location-outline" },
+        { id: 2, text: "Book appointment", icon: "calendar-outline" },
+        { id: 3, text: "Join queue", icon: "people-outline" },
+        { id: 4, text: "Check wait times", icon: "time-outline" },
+      ];
+    } else if (botResponse.type === "urgent") {
+      newReplies = [
+        { id: 1, text: "Call emergency now", icon: "call-outline" },
+        { id: 2, text: "Find nearest clinic", icon: "location-outline" },
+        { id: 3, text: "It's getting worse", icon: "warning-outline" },
       ];
     } else {
-      newReplies = quickReplies;
+      // Default replies with health focus
+      newReplies = [
+        { id: 1, text: "I have symptoms", icon: "medical-outline" },
+        { id: 2, text: "Need a clinic", icon: "location-outline" },
+        { id: 3, text: "Book appointment", icon: "calendar-outline" },
+        { id: 4, text: "Health tips", icon: "heart-outline" },
+        { id: 5, text: "Emergency help", icon: "warning-outline" },
+      ];
     }
 
     setCurrentQuickReplies(newReplies);
@@ -193,25 +206,76 @@ export const AIChatScreen = ({ onNavigate }) => {
       onNavigate(action.target);
     } else if (action.action === "emergency") {
       Alert.alert(
-        "Emergency Services",
-        "🚨 In case of emergency:\n\n• Call 10177 (Emergency Services)\n• Call 082 911 (ER24)\n• Visit your nearest emergency room\n\nDo you need help finding the nearest hospital?",
+        "🚨 Emergency Services",
+        "In South Africa:\n\n• Emergency Services: 10177\n• ER24: 082 911\n• Netcare 911: 082 911\n• Police: 10111\n• Fire: 10177\n\nFor non-emergency urgent care, I can help you find the nearest clinic.",
         [
+          {
+            text: "Call 10177",
+            onPress: () => {
+              /* Implement call functionality */
+            },
+          },
+          { text: "Find Clinics", onPress: () => onNavigate("clinics") },
           { text: "Cancel", style: "cancel" },
-          { text: "Find hospitals", onPress: () => onNavigate("clinics") },
         ]
       );
     } else if (action.action === "escalate") {
-      sendMessage(
-        "My symptoms are getting worse and I'm concerned about my condition"
-      );
+      sendMessage("My symptoms are getting worse and I'm very concerned");
     } else if (action.action === "continue") {
-      // Just continue the conversation
+      // Continue the conversation naturally
     }
   };
+
+  const getConnectionStatusIndicator = () => {
+    switch (connectionStatus) {
+      case "connected":
+        return {
+          color: "#10B981",
+          text: "AI Connected",
+          icon: "checkmark-circle",
+        };
+      case "error":
+        return {
+          color: "#F59E0B",
+          text: "Offline Mode",
+          icon: "warning",
+        };
+      default:
+        return {
+          color: "#6B7280",
+          text: "Connecting...",
+          icon: "ellipsis-horizontal",
+        };
+    }
+  };
+
+  const statusIndicator = getConnectionStatusIndicator();
 
   return (
     <View style={styles.chatContainer}>
       <Header title="AI Health Assistant" onNavigate={onNavigate} />
+
+      {/* Connection Status Indicator */}
+      <View style={styles.connectionStatusBar}>
+        <View style={styles.connectionStatusContent}>
+          <Ionicons
+            name={statusIndicator.icon}
+            size={16}
+            color={statusIndicator.color}
+          />
+          <Text
+            style={[
+              styles.connectionStatusText,
+              { color: statusIndicator.color },
+            ]}
+          >
+            {statusIndicator.text}
+          </Text>
+        </View>
+        {connectionStatus === "connected" && (
+          <Text style={styles.poweredByText}>Powered by Google Gemini</Text>
+        )}
+      </View>
 
       <KeyboardAvoidingView
         style={styles.chatKeyboardView}
@@ -257,30 +321,39 @@ export const AIChatScreen = ({ onNavigate }) => {
           </View>
         )}
 
-        {/* Input Area */}
+        {/* Enhanced Input Area */}
         <View style={styles.chatInputContainer}>
           <View style={styles.chatInputWrapper}>
             <TextInput
               style={styles.chatInput}
-              placeholder="Type your health question..."
+              placeholder="Ask me about your health concerns..."
               placeholderTextColor="#9CA3AF"
               value={inputText}
               onChangeText={setInputText}
               multiline
               maxLength={500}
+              editable={!isTyping}
             />
+
+            {/* Character counter for long messages */}
+            {inputText.length > 400 && (
+              <Text style={styles.characterCounter}>
+                {inputText.length}/500
+              </Text>
+            )}
+
             <TouchableOpacity
               style={[
                 styles.sendButton,
-                !inputText.trim() && styles.sendButtonDisabled,
+                (!inputText.trim() || isTyping) && styles.sendButtonDisabled,
               ]}
               onPress={() => sendMessage()}
-              disabled={!inputText.trim()}
+              disabled={!inputText.trim() || isTyping}
               activeOpacity={0.8}
             >
               <LinearGradient
                 colors={
-                  inputText.trim()
+                  inputText.trim() && !isTyping
                     ? ["#667eea", "#764ba2"]
                     : ["#D1D5DB", "#9CA3AF"]
                 }
@@ -288,14 +361,28 @@ export const AIChatScreen = ({ onNavigate }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons
-                  name="send"
-                  size={20}
-                  color={inputText.trim() ? "#fff" : "#6B7280"}
-                />
+                {isTyping ? (
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={20}
+                    color="#6B7280"
+                  />
+                ) : (
+                  <Ionicons
+                    name="send"
+                    size={20}
+                    color={inputText.trim() ? "#fff" : "#6B7280"}
+                  />
+                )}
               </LinearGradient>
             </TouchableOpacity>
           </View>
+
+          {/* Usage disclaimer */}
+          <Text style={styles.disclaimerText}>
+            AI responses are for informational purposes. Always consult
+            healthcare professionals for medical advice.
+          </Text>
         </View>
       </KeyboardAvoidingView>
     </View>

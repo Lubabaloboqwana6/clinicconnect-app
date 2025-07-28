@@ -1,5 +1,5 @@
 // styles/ScreenStyles.js - Complete styling for all screens
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, Platform } from "react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -72,8 +72,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    paddingHorizontal: Platform.OS === "ios" ? 2 : 0, // Small padding on iOS
   },
   actionCard: {
+    width: (width - 48) / 2,
     marginBottom: 16,
     borderRadius: 16,
     overflow: "hidden",
@@ -82,11 +84,14 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+    // iOS-specific fixes
+    minHeight: Platform.OS === "ios" ? 160 : 140,
   },
   actionGradient: {
-    padding: 20,
-    height: 140,
+    padding: 16, // Reduced from 20 for more space
+    minHeight: Platform.OS === "ios" ? 160 : 140,
     justifyContent: "space-between",
+    alignItems: "flex-start", // Changed from default
   },
   actionIconContainer: {
     width: 40,
@@ -95,17 +100,30 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 8, // Add spacing
   },
   actionTitle: {
-    fontSize: 16,
+    fontSize: Platform.OS === "ios" ? 15 : 16, // Slightly smaller on iOS
     fontWeight: "600",
     color: "#fff",
-    marginTop: 8,
+    marginBottom: 4,
+    lineHeight: Platform.OS === "ios" ? 18 : 20,
+    // iOS text fixes
+    textAlign: "left",
+    numberOfLines: 2, // Allow 2 lines for long titles
+    flexShrink: 1,
+    width: "100%",
   },
   actionSubtitle: {
-    fontSize: 12,
+    fontSize: Platform.OS === "ios" ? 11 : 12, // Smaller on iOS
     color: "rgba(255,255,255,0.8)",
-    marginTop: 2,
+    lineHeight: Platform.OS === "ios" ? 14 : 16,
+    // iOS text fixes
+    textAlign: "left",
+    numberOfLines: 2, // Allow 2 lines
+    flexShrink: 1,
+    width: "100%",
+    marginTop: "auto", // Push to bottom
   },
   healthTipsContainer: {
     paddingHorizontal: 20,
@@ -1830,5 +1848,530 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
     fontWeight: "500",
     letterSpacing: 0.1,
+  },
+  // Connection Status Bar Styles
+  connectionStatusBar: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  connectionStatusContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+
+  connectionStatusText: {
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  poweredByText: {
+    fontSize: 11,
+    color: "#6B7280",
+    fontStyle: "italic",
+    fontWeight: "500",
+  },
+
+  // Enhanced Input Styles
+  characterCounter: {
+    position: "absolute",
+    bottom: 4,
+    right: 50,
+    fontSize: 10,
+    color: "#9CA3AF",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+
+  disclaimerText: {
+    fontSize: 11,
+    color: "#6B7280",
+    textAlign: "center",
+    marginTop: 8,
+    fontStyle: "italic",
+    lineHeight: 14,
+    paddingHorizontal: 20,
+  },
+
+  // Enhanced Message Styles
+  systemMessageBubble: {
+    backgroundColor: "#F3F4F6",
+    borderRadius: 18,
+    borderTopLeftRadius: 4,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderLeftWidth: 4,
+    borderLeftColor: "#F59E0B",
+  },
+
+  systemMessageText: {
+    fontSize: 15,
+    color: "#374151",
+    lineHeight: 22,
+    marginBottom: 8,
+    fontStyle: "italic",
+  },
+
+  errorMessageBubble: {
+    backgroundColor: "#FEF2F2",
+    borderRadius: 18,
+    borderTopLeftRadius: 4,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    borderLeftWidth: 4,
+    borderLeftColor: "#EF4444",
+  },
+
+  errorMessageText: {
+    fontSize: 15,
+    color: "#991B1B",
+    lineHeight: 22,
+    marginBottom: 8,
+  },
+
+  // AI Response Enhancement Styles
+  aiThinkingIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EEF2FF",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginBottom: 8,
+    alignSelf: "flex-start",
+  },
+
+  aiThinkingText: {
+    fontSize: 12,
+    color: "#667eea",
+    fontWeight: "500",
+    marginLeft: 6,
+  },
+
+  // Enhanced Quick Reply Styles
+  quickRepliesContainer: {
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingVertical: 12,
+    maxHeight: 80,
+  },
+
+  quickRepliesContent: {
+    paddingHorizontal: 16,
+    gap: 8,
+    alignItems: "center",
+  },
+
+  enhancedQuickReplyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 8,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    minWidth: 120,
+  },
+
+  urgentQuickReply: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FECACA",
+  },
+
+  urgentQuickReplyText: {
+    color: "#DC2626",
+    fontWeight: "600",
+  },
+
+  // Response Type Indicators
+  responseTypeIndicator: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+
+  responseTypeText: {
+    fontSize: 10,
+    color: "#fff",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+
+  // Conversation Context Styles
+  conversationContext: {
+    backgroundColor: "#F0F9FF",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#0EA5E9",
+  },
+
+  contextTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#0369A1",
+    marginBottom: 4,
+  },
+
+  contextText: {
+    fontSize: 12,
+    color: "#0284C7",
+    lineHeight: 16,
+  },
+
+  // Health Topic Pills
+  healthTopicPill: {
+    backgroundColor: "#ECFDF5",
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+  },
+
+  healthTopicText: {
+    fontSize: 12,
+    color: "#059669",
+    fontWeight: "500",
+  },
+
+  // Loading States
+  aiLoadingDots: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+  },
+
+  aiLoadingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#667eea",
+    marginHorizontal: 3,
+  },
+
+  // Emergency Alert Styles
+  emergencyAlert: {
+    backgroundColor: "#FEF2F2",
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: "#EF4444",
+    elevation: 4,
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+
+  emergencyAlertHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  emergencyAlertTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#DC2626",
+    flex: 1,
+  },
+
+  emergencyAlertText: {
+    fontSize: 14,
+    color: "#991B1B",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+
+  emergencyActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  emergencyCallButton: {
+    flex: 1,
+    backgroundColor: "#EF4444",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  emergencyCallText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  emergencyFindButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#EF4444",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  emergencyFindText: {
+    color: "#EF4444",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+
+  // Conversation Memory Indicator
+  memoryIndicator: {
+    backgroundColor: "#F0F9FF",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: "flex-start",
+    marginBottom: 8,
+  },
+
+  memoryText: {
+    fontSize: 11,
+    color: "#0284C7",
+    fontWeight: "500",
+  },
+
+  // Enhanced Typing Indicator
+  enhancedTypingContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 16,
+    paddingRight: 50,
+  },
+
+  enhancedTypingBubble: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 18,
+    borderTopLeftRadius: 4,
+    padding: 16,
+    minWidth: 80,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+
+  typingWithContext: {
+    backgroundColor: "#EEF2FF",
+    borderColor: "#E0E7FF",
+  },
+
+  // Message Reactions (for future use)
+  messageReactions: {
+    flexDirection: "row",
+    marginTop: 8,
+    gap: 4,
+  },
+
+  reactionButton: {
+    backgroundColor: "#F3F4F6",
+    borderRadius: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  reactionEmoji: {
+    fontSize: 14,
+  },
+
+  // Chat Input Enhancements
+  chatInputContainer: {
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: 24,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+
+  chatInputWrapper: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    position: "relative",
+  },
+
+  chatInputFocused: {
+    borderColor: "#667eea",
+    backgroundColor: "#FEFEFE",
+    elevation: 2,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  chatInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#1F2937",
+    maxHeight: 100,
+    paddingVertical: 8,
+    lineHeight: 22,
+  },
+
+  // Voice Input Button (for future feature)
+  voiceInputButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#EEF2FF",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E0E7FF",
+  },
+
+  voiceInputActive: {
+    backgroundColor: "#667eea",
+    borderColor: "#5a67d8",
+  },
+
+  // Conversation Suggestions
+  conversationSuggestions: {
+    backgroundColor: "#F8FAFC",
+    padding: 16,
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+
+  suggestionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+  },
+
+  suggestionsList: {
+    gap: 8,
+  },
+
+  suggestionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    gap: 10,
+  },
+
+  suggestionText: {
+    fontSize: 13,
+    color: "#4B5563",
+    flex: 1,
+  },
+
+  // Dark Mode Support (optional)
+  darkChatContainer: {
+    backgroundColor: "#1F2937",
+  },
+
+  darkMessageBubble: {
+    backgroundColor: "#374151",
+    borderColor: "#4B5563",
+  },
+
+  darkMessageText: {
+    color: "#F9FAFB",
+  },
+
+  // Accessibility Improvements
+  accessibilityLabel: {
+    position: "absolute",
+    left: -10000,
+    top: -10000,
+    width: 1,
+    height: 1,
+  },
+
+  // Animation Support
+  fadeInMessage: {
+    opacity: 0,
+  },
+
+  fadeInComplete: {
+    opacity: 1,
+  },
+
+  slideUpMessage: {
+    transform: [{ translateY: 20 }],
+  },
+
+  slideUpComplete: {
+    transform: [{ translateY: 0 }],
+  },
+  // Quick Actions Container (iOS-safe)
+  quickActionsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 16,
+    // iOS-specific fixes
+    ...(Platform.OS === "ios" && {
+      fontSize: 19,
+      lineHeight: 24,
+    }),
   },
 });

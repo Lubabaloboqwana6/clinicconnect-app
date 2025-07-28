@@ -1,5 +1,5 @@
 // styles/ComponentStyles.js - Updated component styles
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 export const styles = StyleSheet.create({
   // Header Styles
@@ -2319,5 +2319,125 @@ export const styles = StyleSheet.create({
     padding: 6,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
+  },
+});
+
+// iOS-Compatible Bottom Navigation Styles
+export const iosNavigationStyles = StyleSheet.create({
+  
+  // Modern Bottom Navigation (iOS-safe)
+  modernBottomNav: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingVertical: Platform.OS === 'ios' ? 4 : 12,
+    paddingHorizontal: Platform.OS === 'ios' ? 4 : 8,
+    elevation: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    // iOS safe area and height fixes
+    paddingBottom: Platform.OS === 'ios' ? 20 : 12,
+    minHeight: Platform.OS === 'ios' ? 80 : 85,
+    maxHeight: Platform.OS === 'ios' ? 85 : 95,
+  },
+
+  modernNavItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: Platform.OS === 'ios' ? 6 : 8,
+    paddingHorizontal: Platform.OS === 'ios' ? 2 : 4,
+    justifyContent: "center",
+  },
+
+  activeNavContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  activeNavGradient: {
+    width: Platform.OS === 'ios' ? 50 : 56,
+    height: Platform.OS === 'ios' ? 28 : 32,
+    borderRadius: Platform.OS === 'ios' ? 14 : 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+
+  modernActiveNavText: {
+    fontSize: Platform.OS === 'ios' ? 10 : 12,
+    color: "#667eea",
+    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: Platform.OS === 'ios' ? 12 : 14,
+    // iOS text protection
+    maxWidth: Platform.OS === 'ios' ? 60 : 70,
+    ...(Platform.OS === 'ios' && {
+      includeFontPadding: false,
+      textAlignVertical: "center",
+    }),
+  },
+
+  inactiveNavContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  inactiveNavIconContainer: {
+    width: Platform.OS === 'ios' ? 50 : 56,
+    height: Platform.OS === 'ios' ? 28 : 32,
+    borderRadius: Platform.OS === 'ios' ? 14 : 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+
+  modernInactiveNavText: {
+    fontSize: Platform.OS === 'ios' ? 10 : 12,
+    color: "#6B7280",
+    fontWeight: "500",
+    textAlign: "center",
+    lineHeight: Platform.OS === 'ios' ? 12 : 14,
+    // iOS text protection
+    maxWidth: Platform.OS === 'ios' ? 60 : 70,
+    ...(Platform.OS === 'ios' && {
+      includeFontPadding: false,
+      textAlignVertical: "center",
+    }),
+  },
+
+  // Enhanced notification badge for navigation
+  enhancedNotificationBadge: {
+    position: "absolute",
+    top: Platform.OS === 'ios' ? -2 : -4,
+    right: Platform.OS === 'ios' ? -2 : -4,
+    backgroundColor: "#EF4444",
+    borderRadius: Platform.OS === 'ios' ? 8 : 10,
+    minWidth: Platform.OS === 'ios' ? 16 : 20,
+    height: Platform.OS === 'ios' ? 16 : 20,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+
+  enhancedNotificationBadgeText: {
+    fontSize: Platform.OS === 'ios' ? 9 : 10,
+    fontWeight: "700",
+    color: "#fff",
+    textAlign: "center",
+    lineHeight: Platform.OS === 'ios' ? 10 : 12,
+  },
+
+  notificationPulse: {
+    position: "absolute",
+    width: Platform.OS === 'ios' ? 20 : 24,
+    height: Platform.OS === 'ios' ? 20 : 24,
+    borderRadius: Platform.OS === 'ios' ? 10 : 12,
+    backgroundColor: "rgba(239, 68, 68, 0.3)",
+    top: Platform.OS === 'ios' ? -4 : -6,
+    right: Platform.OS === 'ios' ? -4 : -6,
   },
 });

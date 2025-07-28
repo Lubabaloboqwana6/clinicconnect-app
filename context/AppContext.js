@@ -1,8 +1,8 @@
-// context/AppContext.js - Enhanced with Firebase Queue Integration
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { appointmentsService } from "../services/appointmentsService";
 import { queueService } from "../services/queueService";
+import { clinicsService } from "../services/clinicsService";
 
 const AppContext = createContext();
 
@@ -23,6 +23,10 @@ export const AppProvider = ({ children }) => {
   const [userQueue, setUserQueue] = useState(null);
   const [queueLoading, setQueueLoading] = useState(false);
   const [queueError, setQueueError] = useState(null);
+
+  // Clinic states
+  const [clinics, setClinics] = useState([]);
+  const [clinicsLoading, setClinicsLoading] = useState(false);
 
   // Existing states
   const [appointments, setAppointments] = useState([]);
@@ -52,6 +56,7 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     if (userId) {
       setupQueueListener();
+      loadInitialData();
     }
 
     // Cleanup on unmount or userId change
@@ -76,13 +81,26 @@ export const AppProvider = ({ children }) => {
         console.log("✅ Retrieved existing user ID:", storedUserId);
       }
       setUserId(storedUserId);
-
-      // Load user's data
-      await loadUserData(storedUserId);
     } catch (error) {
       console.error("❌ Error initializing user:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadInitialData = async () => {
+    try {
+      console.log("🔄 Loading initial app data...");
+
+      // Load user's data
+      await loadUserData(userId);
+
+      // Initialize clinics if needed
+      await clinicsService.initializeClinicsIfEmpty();
+
+      console.log("✅ Initial data loaded successfully");
+    } catch (error) {
+      console.error("❌ Error loading initial data:", error);
     }
   };
 
@@ -135,9 +153,102 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Enhanced clinic management functions
+
+  // Load clinics from Firebase
+  const loadClinics = async () => {
+    try {
+      setClinicsLoading(true);
+      const firebaseClinics = await clinicsService.getAllClinics();
+
+      // Transform to match expected format
+      const transformedClinics = firebaseClinics.map((clinic) => ({
+        id: clinic.id,
+        name: clinic.name,
+        address: clinic.address,
+        distance: clinic.distanceText || "Unknown",
+        currentQueue: clinic.currentQueue || 0,
+        estimatedWait: clinic.estimatedWait || 0,
+        services: clinic.services || [],
+        hours: clinic.hours || "Unknown",
+        phone: clinic.phone || "",
+        coordinates: clinic.coordinates,
+        isOpen: clinic.isOpen !== false,
+        maxQueueSize: clinic.maxQueueSize || 50,
+      }));
+
+      setClinics(transformedClinics);
+      console.log(`✅ Loaded ${transformedClinics.length} clinics`);
+      return transformedClinics;
+    } catch (error) {
+      console.error("❌ Error loading clinics:", error);
+      throw error;
+    } finally {
+      setClinicsLoading(false);
+    }
+  };
+
+  // Search clinics
+  const searchClinics = async (searchTerm) => {
+    try {
+      setClinicsLoading(true);
+      const searchResults = await clinicsService.searchClinics(searchTerm);
+
+      const transformedResults = searchResults.map((clinic) => ({
+        id: clinic.id,
+        name: clinic.name,
+        address: clinic.address,
+        distance: clinic.distanceText || "Unknown",
+        currentQueue: clinic.currentQueue || 0,
+        estimatedWait: clinic.estimatedWait || 0,
+        services: clinic.services || [],
+        hours: clinic.hours || "Unknown",
+        phone: clinic.phone || "",
+        coordinates: clinic.coordinates,
+        isOpen: clinic.isOpen !== false,
+        maxQueueSize: clinic.maxQueueSize || 50,
+      }));
+
+      setClinics(transformedResults);
+      return transformedResults;
+    } catch (error) {
+      console.error("❌ Error searching clinics:", error);
+      throw error;
+    } finally {
+      setClinicsLoading(false);
+    }
+  };
+
+  // Get clinic by ID from Firebase
+  const getClinicById = async (clinicId) => {
+    try {
+      const clinic = await clinicsService.getClinicById(clinicId);
+      if (clinic) {
+        return {
+          id: clinic.id,
+          name: clinic.name,
+          address: clinic.address,
+          distance: clinic.distanceText || "Unknown",
+          currentQueue: clinic.currentQueue || 0,
+          estimatedWait: clinic.estimatedWait || 0,
+          services: clinic.services || [],
+          hours: clinic.hours || "Unknown",
+          phone: clinic.phone || "",
+          coordinates: clinic.coordinates,
+          isOpen: clinic.isOpen !== false,
+          maxQueueSize: clinic.maxQueueSize || 50,
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("❌ Error getting clinic by ID:", error);
+      return null;
+    }
+  };
+
   // Enhanced queue management functions
 
-  // Join queue with comprehensive error handling
+  // Join queue with clinic validation
   const joinQueue = async (clinicData, userDetails) => {
     if (!userId) {
       throw new Error("User not initialized");
@@ -464,8 +575,17 @@ export const AppProvider = ({ children }) => {
     queueLoading,
     queueError,
 
+    // Clinic data and states
+    clinics,
+    clinicsLoading,
+
     // Other data
     appointments,
+
+    // Enhanced clinic functions
+    loadClinics,
+    searchClinics,
+    getClinicById,
 
     // Enhanced queue functions
     joinQueue,
