@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useApp } from "../context/AppContext";
 
-// Base mock notifications (can be removed later)
+// Simple mock notifications for basic functionality
 const baseMockNotifications = [
   {
     id: 1000,
@@ -16,18 +16,24 @@ const baseMockNotifications = [
 ];
 
 export const useNotifications = () => {
-  const { userQueue, appointments } = useApp();
+  const { userQueue, appointments, updateUnreadCount } = useApp();
   const [notifications, setNotifications] = useState(baseMockNotifications);
+  const [loading, setLoading] = useState(false);
 
-  // Calculate unread count
+  // Calculate unread count and sync with AppContext
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Sync unread count with AppContext
+  useEffect(() => {
+    updateUnreadCount(unreadCount);
+  }, [unreadCount, updateUnreadCount]);
 
   // Generate appointment-related notifications
   const generateAppointmentNotifications = (
     appointment,
     action = "created"
   ) => {
-    const baseId = Date.now();
+    const baseId = Date.now() + Math.random();
     const newNotifications = [];
 
     switch (action) {
@@ -83,12 +89,18 @@ export const useNotifications = () => {
           id: baseId,
           type: "appointment_reminder",
           title: "Appointment Cancelled",
-          message: `Your appointment at ${appointment.clinicName} scheduled for ${appointment.date} at ${appointment.time} has been cancelled.`,
+          message: `Your appointment at ${appointment.clinicName} for ${appointment.date} at ${appointment.time} has been cancelled.`,
           timestamp: new Date(),
           read: false,
-          priority: "normal",
+          priority: "high",
           linkedId: appointment.id,
           linkedType: "appointment",
+          actionData: {
+            appointmentId: appointment.id,
+            clinicName: appointment.clinicName,
+            date: appointment.date,
+            time: appointment.time,
+          },
         });
         break;
 
@@ -118,7 +130,7 @@ export const useNotifications = () => {
 
   // Generate queue-related notifications
   const generateQueueNotifications = (queue, action = "joined") => {
-    const baseId = Date.now();
+    const baseId = Date.now() + Math.random();
     const newNotifications = [];
 
     switch (action) {
@@ -126,73 +138,72 @@ export const useNotifications = () => {
         newNotifications.push({
           id: baseId,
           type: "queue_update",
-          title: "Queue Joined Successfully! 🏥",
-          message: `You're now #${queue.position} in line at ${queue.clinicName}. Estimated wait time: ${queue.estimatedWait} minutes.`,
+          title: "Queue Joined Successfully! 🎉",
+          message: `You've joined the queue at ${queue.clinicName || "ClinicConnect+"}. Your position: #${queue.position}. Estimated wait: ${queue.estimatedWait || "15-20 minutes"}.`,
           timestamp: new Date(),
           read: false,
           priority: "normal",
           linkedId: queue.clinicId,
           linkedType: "queue",
           actionData: {
-            clinicId: queue.clinicId,
-            clinicName: queue.clinicName,
             position: queue.position,
+            clinicName: queue.clinicName,
             estimatedWait: queue.estimatedWait,
           },
         });
         break;
 
       case "position_updated":
-        if (queue.position <= 3) {
-          newNotifications.push({
-            id: baseId,
-            type: "queue_update",
-            title: "Almost Your Turn! 🔔",
-            message: `You're now #${queue.position} in line at ${queue.clinicName}. Please prepare to be called soon!`,
-            timestamp: new Date(),
-            read: false,
-            priority: "high",
-            linkedId: queue.clinicId,
-            linkedType: "queue",
-            actionData: {
-              clinicId: queue.clinicId,
-              clinicName: queue.clinicName,
-              position: queue.position,
-              estimatedWait: queue.estimatedWait,
-            },
-          });
-        } else {
-          newNotifications.push({
-            id: baseId,
-            type: "queue_update",
-            title: "Queue Position Updated",
-            message: `You're now #${queue.position} in line at ${queue.clinicName}. Estimated wait: ${queue.estimatedWait} minutes.`,
-            timestamp: new Date(),
-            read: false,
-            priority: "normal",
-            linkedId: queue.clinicId,
-            linkedType: "queue",
-            actionData: {
-              clinicId: queue.clinicId,
-              clinicName: queue.clinicName,
-              position: queue.position,
-              estimatedWait: queue.estimatedWait,
-            },
-          });
-        }
+        newNotifications.push({
+          id: baseId,
+          type: "queue_update",
+          title: "Queue Position Updated",
+          message: `Your position in the queue has changed to #${queue.position}. Estimated wait: ${queue.estimatedWait || "10-15 minutes"}.`,
+          timestamp: new Date(),
+          read: false,
+          priority: "normal",
+          linkedId: queue.clinicId,
+          linkedType: "queue",
+          actionData: {
+            position: queue.position,
+            clinicName: queue.clinicName,
+            estimatedWait: queue.estimatedWait,
+          },
+        });
+        break;
+
+      case "called":
+        newNotifications.push({
+          id: baseId,
+          type: "queue_update",
+          title: "You're Next! 🚨",
+          message: `You've been called! Please proceed to the clinic counter.`,
+          timestamp: new Date(),
+          read: false,
+          priority: "high",
+          linkedId: queue.clinicId,
+          linkedType: "queue",
+          actionData: {
+            position: queue.position,
+            clinicName: queue.clinicName,
+          },
+        });
         break;
 
       case "left":
         newNotifications.push({
           id: baseId,
           type: "queue_update",
-          title: "Left Queue",
-          message: `You have left the queue at ${queue.clinicName}. Thank you for using our service!`,
+          title: "Queue Left",
+          message: `You have left the queue. Thank you for using ClinicConnect+!`,
           timestamp: new Date(),
           read: false,
           priority: "normal",
           linkedId: queue.clinicId,
           linkedType: "queue",
+          actionData: {
+            clinicName: queue.clinicName,
+          },
         });
         break;
     }
@@ -292,13 +303,14 @@ export const useNotifications = () => {
   }, [userQueue === null]);
 
   const markAsRead = (notificationId) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
+    setNotifications((prev) => {
+      const updated = prev.map((notification) =>
         notification.id === notificationId
           ? { ...notification, read: true }
           : notification
-      )
-    );
+      );
+      return updated;
+    });
   };
 
   const markAllAsRead = () => {
@@ -314,28 +326,14 @@ export const useNotifications = () => {
   };
 
   const addNotification = (newNotification) => {
-    setNotifications((prev) => [
-      {
-        id: Date.now(),
-        timestamp: new Date(),
-        read: false,
-        priority: "normal",
-        ...newNotification,
-      },
-      ...prev,
-    ]);
+    setNotifications((prev) => [newNotification, ...prev]);
   };
 
-  // Method to manually trigger appointment notifications (for testing)
   const triggerAppointmentNotification = (appointment, action = "created") => {
-    const newNotifications = generateAppointmentNotifications(
-      appointment,
-      action
-    );
+    const newNotifications = generateAppointmentNotifications(appointment, action);
     setNotifications((prev) => [...newNotifications, ...prev]);
   };
 
-  // Method to manually trigger queue notifications (for testing)
   const triggerQueueNotification = (queue, action = "joined") => {
     const newNotifications = generateQueueNotifications(queue, action);
     setNotifications((prev) => [...newNotifications, ...prev]);
@@ -344,6 +342,7 @@ export const useNotifications = () => {
   return {
     notifications,
     unreadCount,
+    loading,
     markAsRead,
     markAllAsRead,
     deleteNotification,

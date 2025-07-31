@@ -37,13 +37,24 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   notificationButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#F8FAFC",
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  notificationButtonActive: {
+    backgroundColor: "#FEF3F2",
+    borderColor: "#FECACA",
   },
   notificationBadge: {
     position: "absolute",
@@ -2439,5 +2450,255 @@ export const iosNavigationStyles = StyleSheet.create({
     backgroundColor: "rgba(239, 68, 68, 0.3)",
     top: Platform.OS === 'ios' ? -4 : -6,
     right: Platform.OS === 'ios' ? -4 : -6,
+  },
+
+  // Modern notification badge styles
+  modernNotificationBadge: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "#EF4444",
+    borderRadius: 12,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+
+  modernNotificationBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#fff",
+    textAlign: "center",
+    lineHeight: 12,
+    includeFontPadding: false,
+  },
+
+  modernNotificationPulse: {
+    position: "absolute",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(239, 68, 68, 0.2)",
+    top: -2,
+    right: -2,
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.3)",
+  },
+
+  // Notification Detail Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    width: "90%",
+    maxHeight: "80%",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+
+  closeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1F2937",
+  },
+
+  modalContent: {
+    padding: 20,
+  },
+
+  detailHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  detailIconContainer: {
+    marginRight: 16,
+  },
+
+  detailIconGradient: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  detailTitleContainer: {
+    flex: 1,
+  },
+
+  detailTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 4,
+  },
+
+  detailTime: {
+    fontSize: 14,
+    color: "#6B7280",
+  },
+
+  detailPriorityContainer: {
+    marginBottom: 20,
+  },
+
+  detailPriorityBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: "flex-start",
+  },
+
+  detailPriorityText: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginLeft: 6,
+  },
+
+  detailMessageContainer: {
+    marginBottom: 20,
+  },
+
+  detailMessageLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+  },
+
+  detailMessage: {
+    fontSize: 16,
+    color: "#1F2937",
+    lineHeight: 24,
+  },
+
+  detailActionContainer: {
+    marginBottom: 20,
+  },
+
+  detailSectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 12,
+  },
+
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+
+  detailItemText: {
+    fontSize: 14,
+    color: "#374151",
+    marginLeft: 8,
+  },
+
+  detailHistoryContainer: {
+    marginBottom: 20,
+  },
+
+  historyItem: {
+    backgroundColor: "#F9FAFB",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+
+  historyTime: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+
+  historyMessage: {
+    fontSize: 14,
+    color: "#374151",
+    marginBottom: 4,
+  },
+
+  historyMethod: {
+    fontSize: 12,
+    color: "#9CA3AF",
+  },
+
+  modalActions: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    gap: 12,
+  },
+
+  modalSecondaryButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+  },
+
+  modalSecondaryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+
+  modalPrimaryButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    backgroundColor: "#667eea",
+    alignItems: "center",
+  },
+
+  modalPrimaryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
   },
 });

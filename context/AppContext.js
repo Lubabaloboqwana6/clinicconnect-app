@@ -28,6 +28,9 @@ export const AppProvider = ({ children }) => {
   const [clinics, setClinics] = useState([]);
   const [clinicsLoading, setClinicsLoading] = useState(false);
 
+  // Notification states
+  const [unreadCount, setUnreadCount] = useState(0);
+
   // Existing states
   const [appointments, setAppointments] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
@@ -151,6 +154,11 @@ export const AppProvider = ({ children }) => {
       console.error("❌ Error setting up queue listener:", error);
       setQueueError("Failed to connect to queue updates");
     }
+  };
+
+  // Update unread count when notifications change
+  const updateUnreadCount = (count) => {
+    setUnreadCount(count);
   };
 
   // Enhanced clinic management functions
@@ -579,6 +587,9 @@ export const AppProvider = ({ children }) => {
     clinics,
     clinicsLoading,
 
+    // Notification data
+    unreadCount,
+
     // Other data
     appointments,
 
@@ -602,6 +613,9 @@ export const AppProvider = ({ children }) => {
     cancelAppointment,
     rescheduleAppointment,
     refreshAppointments,
+
+    // Notification functions
+    updateUnreadCount,
 
     // Legacy compatibility (dashboard functions)
     addWalkInToQueue,

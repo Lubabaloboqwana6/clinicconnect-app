@@ -130,7 +130,7 @@ class QueueService {
         );
       }
 
-      // Get current queue count for this clinic
+      // Get current queue for this clinic and calculate next position
       const q = query(
         collection(db, this.collectionName),
         where("clinicId", "==", clinicData.id),
@@ -138,8 +138,14 @@ class QueueService {
       );
 
       const snapshot = await getDocs(q);
-      const currentPosition = snapshot.size + 1;
-      const estimatedWait = this.calculateWaitTime(currentPosition);
+      const currentQueue = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // Calculate next available position (handles gaps properly)
+      const nextPosition = this.getNextAvailablePosition(currentQueue);
+      const estimatedWait = this.calculateWaitTime(nextPosition);
 
       const queueData = {
         // Basic info
@@ -148,32 +154,31 @@ class QueueService {
         patientId: userId,
 
         // Patient details
-        patientName: userDetails.name,
-        idNumber: userDetails.idNumber,
-        phoneNumber: userDetails.phoneNumber,
+        patientName: userDetails.name || "App User",
+        idNumber: userDetails.idNumber || "",
+        phoneNumber: userDetails.phoneNumber || "",
+        reasonForVisit: userDetails.reasonForVisit || "General consultation",
 
-        // Queue management
-        type: "app", // Mark as app user (vs walk-in)
+        // Queue info
+        position: nextPosition,
         status: "Waiting",
-        position: currentPosition,
-
-        // Timestamps
-        joinedAt: serverTimestamp(),
-        addedAt: serverTimestamp(),
+        type: "app",
         joinTime: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
 
-        // Estimates and notifications
-        estimatedWait: estimatedWait,
+        // Timestamps
+        joinedAt: serverTimestamp(),
+        addedAt: serverTimestamp(),
+
+        // Notification settings
         notified: false,
         lastNotifiedAt: null,
         notificationCount: 0,
 
-        // Metadata
-        createdBy: "mobile_app",
-        deviceType: "mobile",
+        // Estimated wait
+        estimatedWait: estimatedWait,
       };
 
       const docRef = await addDoc(
@@ -181,27 +186,47 @@ class QueueService {
         queueData
       );
 
-      const result = {
+      const newQueueItem = {
         id: docRef.id,
         ...queueData,
         joinedAt: new Date().toISOString(),
         addedAt: new Date().toISOString(),
-        userDetails: {
-          name: userDetails.name,
-          idNumber: userDetails.idNumber,
-          phoneNumber: userDetails.phoneNumber,
-        },
       };
 
       console.log("✅ Successfully joined queue:", {
         id: docRef.id,
         clinic: clinicData.name,
-        position: currentPosition,
+        position: nextPosition,
         estimatedWait: estimatedWait,
       });
 
-      return result;
-    }, "Join Queue");
+      return newQueueItem;
+    });
+  }
+
+  // Get next available position (handles gaps in queue)
+  getNextAvailablePosition(currentQueue) {
+    if (currentQueue.length === 0) {
+      return 1;
+    }
+
+    // Get all positions and sort them
+    const positions = currentQueue
+      .map(item => item.position)
+      .sort((a, b) => a - b);
+
+    // Find the first gap or return the next number
+    let expectedPosition = 1;
+    for (const position of positions) {
+      if (position > expectedPosition) {
+        // Found a gap, use this position
+        return expectedPosition;
+      }
+      expectedPosition = position + 1;
+    }
+
+    // No gaps found, return the next position
+    return expectedPosition;
   }
 
   // ✅ Enhanced get user queue status with error handling
@@ -426,6 +451,57 @@ class QueueService {
       console.error("❌ Queue connection test failed:", error);
       return false;
     });
+  }
+
+  // Clean up queue positions (called periodically)
+  async cleanupQueuePositions() {
+    try {
+      console.log("🧹 Cleaning up queue positions...");
+      
+      // Get all queues and clean up positions
+      const q = query(collection(db, this.collectionName));
+      const snapshot = await getDocs(q);
+      const allQueues = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // Group by clinic and clean up each clinic's queue
+      const queuesByClinic = {};
+      allQueues.forEach(queue => {
+        if (!queuesByClinic[queue.clinicId]) {
+          queuesByClinic[queue.clinicId] = [];
+        }
+        queuesByClinic[queue.clinicId].push(queue);
+      });
+
+      // Focus on clinic ID "1" for now (main clinic)
+      const clinicId = "1";
+      const queues = queuesByClinic[clinicId] || [];
+      
+      if (queues.length > 0) {
+        const waitingPatients = queues
+          .filter((p) => p.status === "Waiting")
+          .sort((a, b) => a.position - b.position);
+
+        // Update positions to be sequential
+        for (let i = 0; i < waitingPatients.length; i++) {
+          const patient = waitingPatients[i];
+          const newPosition = i + 1;
+          
+          if (patient.position !== newPosition) {
+            await this.updateQueueDetails(patient.id, {
+              position: newPosition,
+            });
+            console.log(`🔄 Updated position for ${patient.patientName}: ${patient.position} → ${newPosition}`);
+          }
+        }
+      }
+
+      console.log("✅ Queue positions cleaned up successfully");
+    } catch (error) {
+      console.error("❌ Error cleaning up queue positions:", error);
+    }
   }
 }
 

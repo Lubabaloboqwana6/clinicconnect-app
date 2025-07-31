@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { styles } from "../styles/ComponentStyles";
 
-export const BottomNavigation = ({ currentScreen, onNavigate }) => {
+export const BottomNavigation = ({ currentScreen, onNavigate, unreadCount = 0 }) => {
   const navItems = [
     { key: "home", icon: "home", label: "Home" },
     { key: "clinics", icon: "location", label: "Clinics" },
@@ -12,13 +12,14 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
       key: "appointments",
       icon: "calendar",
       label: Platform.OS === "ios" ? "Appts" : "Appointments",
-    }, // Shorter on iOS
+    },
     { key: "queue", icon: "people", label: "Queue" },
+    { key: "notifications", icon: "notifications", label: "Notifications" },
   ];
 
-  // iOS-optimized navigation item component
   const NavItem = ({ item }) => {
     const isActive = currentScreen === item.key;
+    const isNotificationTab = item.key === "notifications";
 
     return (
       <TouchableOpacity
@@ -27,13 +28,12 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
           alignItems: "center",
           paddingVertical: Platform.OS === "ios" ? 8 : 12,
           paddingHorizontal: 4,
-          minHeight: Platform.OS === "ios" ? 60 : 65, // Shorter on iOS
+          minHeight: Platform.OS === "ios" ? 60 : 65,
         }}
         onPress={() => onNavigate(item.key)}
         activeOpacity={0.7}
       >
         {isActive ? (
-          // Active item with gradient background
           <View
             style={{
               alignItems: "center",
@@ -49,6 +49,7 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
                 justifyContent: "center",
                 alignItems: "center",
                 marginBottom: 4,
+                position: "relative",
               }}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
@@ -58,6 +59,33 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
                 size={Platform.OS === "ios" ? 20 : 24}
                 color="#fff"
               />
+              {/* Notification Badge */}
+              {isNotificationTab && unreadCount > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -5,
+                    backgroundColor: "#EF4444",
+                    borderRadius: 10,
+                    minWidth: 20,
+                    height: 20,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingHorizontal: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 10,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
             </LinearGradient>
             <Text
               style={{
@@ -75,7 +103,6 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
             </Text>
           </View>
         ) : (
-          // Inactive item
           <View
             style={{
               alignItems: "center",
@@ -90,6 +117,7 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
                 justifyContent: "center",
                 alignItems: "center",
                 marginBottom: 4,
+                position: "relative",
               }}
             >
               <Ionicons
@@ -97,6 +125,33 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
                 size={Platform.OS === "ios" ? 20 : 24}
                 color="#6B7280"
               />
+              {/* Notification Badge */}
+              {isNotificationTab && unreadCount > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -5,
+                    backgroundColor: "#EF4444",
+                    borderRadius: 10,
+                    minWidth: 20,
+                    height: 20,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingHorizontal: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 10,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
             </View>
             <Text
               style={{
@@ -132,8 +187,7 @@ export const BottomNavigation = ({ currentScreen, onNavigate }) => {
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.1,
         shadowRadius: 12,
-        // iOS safe area handling
-        paddingBottom: Platform.OS === "ios" ? 20 : 12, // Account for home indicator
+        paddingBottom: Platform.OS === "ios" ? 20 : 12,
         minHeight: Platform.OS === "ios" ? 80 : 85,
       }}
     >
