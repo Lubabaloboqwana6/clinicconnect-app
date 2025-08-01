@@ -7,6 +7,7 @@ import { QueueScreen } from "./screens/QueueScreen";
 import { NotificationsScreen } from "./screens/NotificationsScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { LoginScreen } from "./screens/LoginScreen";
+import { AIChatScreen } from "./screens/AIChatScreen";
 import { BottomNavigation } from "./components/BottomNavigation";
 import { BookingModal } from "./components/BookingModal";
 import { QueueModal } from "./components/QueueModal";
@@ -49,7 +50,13 @@ const AppContent = () => {
       case "home":
         return <HomeScreen onNavigate={setCurrentScreen} />;
       case "clinics":
-        return <ClinicsScreen onNavigate={setCurrentScreen} />;
+        return (
+          <ClinicsScreen 
+            onNavigate={setCurrentScreen}
+            onShowBookingModal={() => setShowBookingModal(true)}
+            onShowQueueModal={() => setShowQueueModal(true)}
+          />
+        );
       case "appointments":
         return (
           <AppointmentsScreen
@@ -61,13 +68,15 @@ const AppContent = () => {
         return (
           <QueueScreen
             onNavigate={setCurrentScreen}
-            setShowQueueModal={setShowQueueModal}
+            onShowQueueModal={() => setShowQueueModal(true)}
           />
         );
       case "notifications":
         return <NotificationsScreen onNavigate={setCurrentScreen} />;
       case "profile":
         return <ProfileScreen onNavigate={setCurrentScreen} />;
+      case "symptoms":
+        return <AIChatScreen onNavigate={setCurrentScreen} />;
       default:
         return <HomeScreen onNavigate={setCurrentScreen} />;
     }

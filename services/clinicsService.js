@@ -12,141 +12,12 @@ import {
   where,
   serverTimestamp,
   limit,
+  onSnapshot,
 } from "firebase/firestore";
 
 class ClinicsService {
   constructor() {
     this.collectionName = "clinics";
-  }
-
-  // Add sample clinics (for initial setup)
-  async addSampleClinics() {
-    const sampleClinics = [
-      {
-        name: "Soweto Community Clinic",
-        address: "123 Vilakazi Street, Soweto, Johannesburg",
-        phone: "+27123456789",
-        services: ["General Practice", "Chronic Care", "Maternal Care"],
-        hours: "07:00 - 16:00",
-        coordinates: {
-          latitude: -26.2692,
-          longitude: 27.8546,
-        },
-        currentQueue: 0,
-        estimatedWait: 0,
-        isOpen: true,
-        operatingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        maxQueueSize: 50,
-        averageServiceTime: 15, // minutes per patient
-      },
-      {
-        name: "Alexandra Health Centre",
-        address: "456 London Road, Alexandra, Johannesburg",
-        phone: "+27234567890",
-        services: ["General Practice", "HIV/AIDS Care", "TB Treatment"],
-        hours: "08:00 - 17:00",
-        coordinates: {
-          latitude: -26.1017,
-          longitude: 28.1142,
-        },
-        currentQueue: 0,
-        estimatedWait: 0,
-        isOpen: true,
-        operatingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        maxQueueSize: 40,
-        averageServiceTime: 12,
-      },
-      {
-        name: "Diepsloot Primary Healthcare",
-        address: "789 Main Street, Diepsloot, Johannesburg",
-        phone: "+27345678901",
-        services: ["General Practice", "Family Planning", "Immunization"],
-        hours: "07:30 - 16:30",
-        coordinates: {
-          latitude: -25.9335,
-          longitude: 28.0119,
-        },
-        currentQueue: 0,
-        estimatedWait: 0,
-        isOpen: true,
-        operatingDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        maxQueueSize: 35,
-        averageServiceTime: 18,
-      },
-      {
-        name: "Sandton Medical Centre",
-        address: "101 Rivonia Road, Sandton, Johannesburg",
-        phone: "+27456789012",
-        services: ["General Practice", "Chronic Care", "Minor Surgery"],
-        hours: "08:00 - 18:00",
-        coordinates: {
-          latitude: -26.1076,
-          longitude: 28.0567,
-        },
-        currentQueue: 0,
-        estimatedWait: 0,
-        isOpen: true,
-        operatingDays: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ],
-        maxQueueSize: 60,
-        averageServiceTime: 20,
-      },
-      {
-        name: "Johannesburg General Hospital",
-        address: "Hospital Street, Doornfontein, Johannesburg",
-        phone: "+27567890123",
-        services: ["Emergency Care", "General Practice", "Specialist Care"],
-        hours: "24/7",
-        coordinates: {
-          latitude: -26.1914,
-          longitude: 28.0436,
-        },
-        currentQueue: 0,
-        estimatedWait: 0,
-        isOpen: true,
-        operatingDays: [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday",
-        ],
-        maxQueueSize: 100,
-        averageServiceTime: 25,
-      },
-    ];
-
-    try {
-      console.log("🏥 Adding sample clinics to Firebase...");
-
-      for (const clinic of sampleClinics) {
-        const clinicData = {
-          ...clinic,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        };
-
-        const docRef = await addDoc(
-          collection(db, this.collectionName),
-          clinicData
-        );
-        console.log(`✅ Added clinic: ${clinic.name} with ID: ${docRef.id}`);
-      }
-
-      console.log("🎉 All sample clinics added successfully!");
-      return true;
-    } catch (error) {
-      console.error("❌ Error adding sample clinics:", error);
-      throw error;
-    }
   }
 
   // Get all clinics
@@ -265,6 +136,67 @@ class ClinicsService {
     }, "Update Clinic Queue");
   }
 
+  // Get real-time queue updates for a specific clinic
+  subscribeToClinicQueue(clinicId, callback) {
+    return withFirestoreErrorHandling(async () => {
+      console.log(`📡 Setting up real-time queue listener for clinic: ${clinicId}`);
+      
+      const clinicRef = doc(db, this.collectionName, clinicId);
+      
+      const unsubscribe = onSnapshot(clinicRef, (doc) => {
+        if (doc.exists()) {
+          const clinicData = doc.data();
+          const queueData = {
+            id: doc.id,
+            currentQueue: clinicData.currentQueue || 0,
+            estimatedWait: clinicData.estimatedWait || 0,
+            updatedAt: clinicData.updatedAt,
+          };
+          
+          console.log(`📡 Clinic queue update for ${clinicId}:`, queueData);
+          callback(queueData);
+        }
+      }, (error) => {
+        console.error(`❌ Error listening to clinic ${clinicId} queue:`, error);
+      });
+
+      return unsubscribe;
+    }, "Subscribe to Clinic Queue");
+  }
+
+  // Calculate and update clinic queue statistics
+  async updateClinicQueueStats(clinicId) {
+    return withFirestoreErrorHandling(async () => {
+      // Get queue data from the queue collection
+      const queueQuery = query(
+        collection(db, "queue"),
+        where("clinicId", "==", clinicId),
+        where("status", "in", ["Waiting", "Called"])
+      );
+      
+      const queueSnapshot = await getDocs(queueQuery);
+      const waitingCount = queueSnapshot.docs.filter(
+        doc => doc.data().status === "Waiting"
+      ).length;
+      
+      // Calculate estimated wait time (15 minutes per patient)
+      const estimatedWaitMinutes = Math.max(waitingCount * 15, 5);
+      
+      // Update the clinic document
+      await this.updateClinicQueue(clinicId, waitingCount, estimatedWaitMinutes);
+      
+      console.log(`📊 Updated clinic ${clinicId} stats:`, {
+        queueCount: waitingCount,
+        estimatedWait: estimatedWaitMinutes
+      });
+      
+      return {
+        currentQueue: waitingCount,
+        estimatedWait: estimatedWaitMinutes
+      };
+    }, "Update Clinic Queue Stats");
+  }
+
   // Calculate distance between two coordinates (Haversine formula)
   calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Radius of the Earth in kilometers
@@ -379,23 +311,53 @@ class ClinicsService {
     }, "Check Clinics Collection");
   }
 
-  // Initialize clinics if collection is empty
-  async initializeClinicsIfEmpty() {
-    try {
-      const isEmpty = await this.isClinicsCollectionEmpty();
+  // Get clinics that are currently open
+  async getOpenClinics() {
+    return withFirestoreErrorHandling(async () => {
+      const q = query(
+        collection(db, this.collectionName),
+        where("isOpen", "==", true),
+        orderBy("name", "asc")
+      );
 
-      if (isEmpty) {
-        console.log("📋 Clinics collection is empty, adding sample data...");
-        await this.addSampleClinics();
-        return true;
-      } else {
-        console.log("📋 Clinics collection already has data");
-        return false;
-      }
-    } catch (error) {
-      console.error("❌ Error initializing clinics:", error);
-      return false;
-    }
+      const snapshot = await getDocs(q);
+      const clinics = [];
+
+      snapshot.forEach((doc) => {
+        clinics.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      console.log(`🏥 Found ${clinics.length} open clinics`);
+      return clinics;
+    }, "Get Open Clinics");
+  }
+
+  // Get clinics with low queue times
+  async getClinicsWithLowQueue(maxQueueSize = 10) {
+    return withFirestoreErrorHandling(async () => {
+      const q = query(
+        collection(db, this.collectionName),
+        where("currentQueue", "<=", maxQueueSize),
+        where("isOpen", "==", true),
+        orderBy("currentQueue", "asc")
+      );
+
+      const snapshot = await getDocs(q);
+      const clinics = [];
+
+      snapshot.forEach((doc) => {
+        clinics.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      console.log(`⚡ Found ${clinics.length} clinics with low queue`);
+      return clinics;
+    }, "Get Clinics With Low Queue");
   }
 }
 

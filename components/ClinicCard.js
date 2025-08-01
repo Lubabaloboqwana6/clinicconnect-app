@@ -11,6 +11,32 @@ export const ClinicCard = ({ clinic, onJoinQueue, onBookAppointment }) => {
     return "#EF4444";
   };
 
+  const formatWaitTime = (estimatedWait) => {
+    console.log("🔍 Debug estimatedWait:", estimatedWait, typeof estimatedWait);
+    
+    // Handle different data types
+    if (!estimatedWait || estimatedWait === 0 || estimatedWait === "0") return "Unknown";
+    
+    // Convert to number if it's a string
+    const waitTime = typeof estimatedWait === 'string' ? parseInt(estimatedWait) : estimatedWait;
+    
+    if (isNaN(waitTime) || waitTime === 0) return "Unknown";
+    
+    if (waitTime < 60) return `${waitTime} min`;
+    const hours = Math.floor(waitTime / 60);
+    const minutes = waitTime % 60;
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}m`;
+  };
+
+  // Debug clinic data
+  console.log("🔍 Clinic data:", {
+    name: clinic.name,
+    currentQueue: clinic.currentQueue,
+    estimatedWait: clinic.estimatedWait,
+    type: typeof clinic.estimatedWait
+  });
+
   return (
     <View style={styles.clinicCard}>
       <View style={styles.clinicCardHeader}>
@@ -23,6 +49,13 @@ export const ClinicCard = ({ clinic, onJoinQueue, onBookAppointment }) => {
           <View style={styles.clinicLocationRow}>
             <Ionicons name="time-outline" size={14} color="#6B7280" />
             <Text style={styles.clinicHours}>{clinic.hours}</Text>
+          </View>
+          {/* Add estimated wait time display */}
+          <View style={styles.clinicLocationRow}>
+            <Ionicons name="time-outline" size={14} color="#6B7280" />
+            <Text style={styles.clinicHours}>
+              Est. wait: {formatWaitTime(clinic.estimatedWait)}
+            </Text>
           </View>
         </View>
 

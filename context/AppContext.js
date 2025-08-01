@@ -98,9 +98,6 @@ export const AppProvider = ({ children }) => {
       // Load user's data
       await loadUserData(userId);
 
-      // Initialize clinics if needed
-      await clinicsService.initializeClinicsIfEmpty();
-
       console.log("✅ Initial data loaded successfully");
     } catch (error) {
       console.error("❌ Error loading initial data:", error);

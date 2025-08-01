@@ -16,6 +16,8 @@ import { ErrorMessage } from "../components/ErrorMessage";
 import { useApp } from "../context/AppContext";
 import { clinicsService } from "../services/clinicsService";
 import { styles } from "../styles/ScreenStyles";
+import { onSnapshot, collection } from "firebase/firestore";
+import { db } from "../config/firebase";
 
 export const ClinicsScreen = ({
   onNavigate,
@@ -38,15 +40,59 @@ export const ClinicsScreen = ({
   // Load clinics on component mount
   useEffect(() => {
     loadClinics();
+    setupRealTimeListeners();
   }, []);
+
+  // Set up real-time listeners for clinic updates
+  const setupRealTimeListeners = () => {
+    try {
+      console.log("📡 Setting up real-time clinic listeners...");
+      
+      const unsubscribe = onSnapshot(
+        collection(db, "clinics"),
+        (snapshot) => {
+          const updatedClinics = [];
+          snapshot.forEach((doc) => {
+            const clinicData = doc.data();
+            const clinic = {
+              id: doc.id,
+              ...clinicData,
+              currentQueue: clinicData.currentQueue || 0,
+              estimatedWait: clinicData.estimatedWait || 0,
+            };
+            
+            // Debug each clinic's data
+            console.log(`🔍 Clinic ${clinic.name}:`, {
+              currentQueue: clinic.currentQueue,
+              estimatedWait: clinic.estimatedWait,
+              type: typeof clinic.estimatedWait
+            });
+            
+            updatedClinics.push(clinic);
+          });
+          
+          console.log("📡 Real-time clinic update received:", updatedClinics.length, "clinics");
+          setClinics(updatedClinics);
+        },
+        (error) => {
+          console.error("❌ Real-time listener error:", error);
+        }
+      );
+
+      // Cleanup function
+      return () => {
+        console.log("🧹 Cleaning up real-time listeners");
+        unsubscribe();
+      };
+    } catch (error) {
+      console.error("❌ Error setting up real-time listeners:", error);
+    }
+  };
 
   const loadClinics = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      // Initialize sample clinics if collection is empty
-      await clinicsService.initializeClinicsIfEmpty();
 
       // Load all clinics from Firebase
       const firebaseClinics = await clinicsService.getAllClinics();
@@ -277,33 +323,6 @@ export const ClinicsScreen = ({
                 <Text style={styles.emptyStateButtonText}>Retry</Text>
               </TouchableOpacity>
             )}
-          </View>
-        )}
-
-        {/* Add Clinic Button (for testing) */}
-        {__DEV__ && (
-          <View style={{ padding: 20, marginTop: 20 }}>
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#667eea",
-                borderRadius: 12,
-                paddingVertical: 16,
-                alignItems: "center",
-              }}
-              onPress={async () => {
-                try {
-                  await clinicsService.addSampleClinics();
-                  Alert.alert("Success", "Sample clinics added!");
-                  loadClinics();
-                } catch (error) {
-                  Alert.alert("Error", "Failed to add sample clinics");
-                }
-              }}
-            >
-              <Text style={{ color: "#fff", fontWeight: "600" }}>
-                🏥 Add Sample Clinics (Dev Only)
-              </Text>
-            </TouchableOpacity>
           </View>
         )}
 
