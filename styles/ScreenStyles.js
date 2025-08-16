@@ -1966,32 +1966,35 @@ export const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
-    paddingVertical: 12,
-    maxHeight: 80,
+    paddingVertical: 16,
+    maxHeight: 100,
   },
 
   quickRepliesContent: {
     paddingHorizontal: 16,
-    gap: 8,
-    alignItems: "center",
+    gap: 10,
+    alignItems: "flex-start",
   },
 
   enhancedQuickReplyButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F8FAFC",
-    borderRadius: 20,
+    borderRadius: 18,
+    borderTopLeftRadius: 4,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderWidth: 1,
     borderColor: "#E2E8F0",
     gap: 8,
-    elevation: 1,
-    shadowColor: "#000",
+    elevation: 2,
+    shadowColor: "#667eea",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
     minWidth: 120,
+    marginHorizontal: 2,
+    marginVertical: 2,
   },
 
   urgentQuickReply: {
@@ -2153,6 +2156,84 @@ export const styles = StyleSheet.create({
 
   emergencyFindText: {
     color: "#EF4444",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+
+  // Warning Alert Styles (for concerning but less urgent situations)
+  warningAlert: {
+    backgroundColor: "#FFFBEB",
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#F59E0B",
+    elevation: 2,
+    shadowColor: "#F59E0B",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  warningAlertHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  warningAlertTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#D97706",
+    flex: 1,
+  },
+
+  warningAlertText: {
+    fontSize: 14,
+    color: "#92400E",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+
+  warningActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  warningFindButton: {
+    flex: 1,
+    backgroundColor: "#F59E0B",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  warningFindText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  warningBookButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#F59E0B",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  warningBookText: {
+    color: "#F59E0B",
     fontWeight: "600",
     fontSize: 14,
   },
@@ -2373,5 +2454,118 @@ export const styles = StyleSheet.create({
       fontSize: 19,
       lineHeight: 24,
     }),
+  },
+
+  // Analytics Screen Styles
+  analyticsContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+
+  comingSoonContainer: {
+    marginBottom: 32,
+  },
+
+  comingSoonGradient: {
+    borderRadius: 20,
+    padding: 32,
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#667eea",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+
+  comingSoonIconContainer: {
+    marginBottom: 16,
+  },
+
+  comingSoonTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#fff",
+    textAlign: "center",
+    marginBottom: 12,
+  },
+
+  comingSoonSubtitle: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
+    lineHeight: 24,
+  },
+
+  featuresContainer: {
+    marginBottom: 32,
+  },
+
+  featuresTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 20,
+  },
+
+  featureCard: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  featureIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+
+  featureContent: {
+    flex: 1,
+  },
+
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 8,
+  },
+
+  featureDescription: {
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 20,
+  },
+
+  backToHomeButton: {
+    marginTop: 20,
+  },
+
+  backToHomeGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    gap: 8,
+  },
+
+  backToHomeText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
   },
 });

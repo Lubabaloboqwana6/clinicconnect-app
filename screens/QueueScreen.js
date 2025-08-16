@@ -15,7 +15,7 @@ import { Header } from "../components/Header";
 import { useApp } from "../context/AppContext";
 import { styles } from "../styles/ScreenStyles";
 
-export const QueueScreen = ({ onNavigate, onShowQueueModal }) => {
+export const QueueScreen = ({ onNavigate, onShowQueueModal, onMenuPress }) => {
   const {
     userQueue,
     queueLoading,
@@ -226,7 +226,7 @@ export const QueueScreen = ({ onNavigate, onShowQueueModal }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Queue Status" onNavigate={onNavigate} />
+      <Header title="Queue Status" onNavigate={onNavigate} onMenuPress={onMenuPress} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

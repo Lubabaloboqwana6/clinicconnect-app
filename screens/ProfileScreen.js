@@ -11,10 +11,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Header } from "../components/Header";
 import { useAuth } from "../context/AuthContext";
 import { styles as appStyles } from "../styles/ScreenStyles";
 
-export const ProfileScreen = ({ onNavigate }) => {
+export const ProfileScreen = ({ onNavigate, onMenuPress }) => {
   const { user, updateUser } = useAuth();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
@@ -117,15 +118,15 @@ export const ProfileScreen = ({ onNavigate }) => {
           title: "Privacy Settings",
           subtitle: "Manage your privacy",
           icon: "shield-checkmark",
-          color: "#06B6D4",
+          color: "#059669",
           onPress: handlePrivacySettings,
         },
         {
           id: "data-usage",
           title: "Data Usage",
-          subtitle: "Manage app data usage",
-          icon: "cellular",
-          color: "#84CC16",
+          subtitle: "View app data usage",
+          icon: "analytics",
+          color: "#7C3AED",
           onPress: handleDataUsage,
         },
       ],
@@ -134,40 +135,27 @@ export const ProfileScreen = ({ onNavigate }) => {
       title: "Support",
       items: [
         {
-          id: "help",
-          title: "Help & Support",
-          subtitle: "Get help and contact support",
-          icon: "help-circle",
-          color: "#F97316",
-          onPress: () => onNavigate("help"),
-        },
-        {
           id: "about",
           title: "About",
           subtitle: "App version and information",
           icon: "information-circle",
-          color: "#6B7280",
+          color: "#3B82F6",
           onPress: handleAbout,
         },
-      ],
-    },
-    {
-      title: "Legal",
-      items: [
         {
           id: "terms",
           title: "Terms of Service",
-          subtitle: "Read our terms of service",
+          subtitle: "Read our terms",
           icon: "document-text",
-          color: "#8B5CF6",
+          color: "#6B7280",
           onPress: handleTerms,
         },
         {
           id: "privacy",
           title: "Privacy Policy",
           subtitle: "Read our privacy policy",
-          icon: "shield",
-          color: "#10B981",
+          icon: "lock-open",
+          color: "#059669",
           onPress: handlePrivacy,
         },
       ],
@@ -175,188 +163,163 @@ export const ProfileScreen = ({ onNavigate }) => {
   ];
 
   return (
-    <ScrollView style={appStyles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => onNavigate("home")}
-        >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Profile</Text>
-        <TouchableOpacity style={styles.editButton} onPress={handleEditProfile}>
-          <Ionicons name="create" size={20} color="#667eea" />
-        </TouchableOpacity>
-      </View>
+    <View style={appStyles.container}>
+      <Header 
+        title="Profile"
+        onNavigate={onNavigate}
+        onMenuPress={onMenuPress}
+      />
 
-      {/* Profile Card */}
-      <View style={styles.profileCard}>
-        <LinearGradient
-          colors={["#667eea", "#764ba2"]}
-          style={styles.profileGradient}
-        >
-          <View style={styles.profileContent}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <Ionicons name="person" size={40} color="#fff" />
-              </View>
-              <TouchableOpacity style={styles.editAvatarButton}>
-                <Ionicons name="camera" size={16} color="#fff" />
-              </TouchableOpacity>
-            </View>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        {/* Profile Header */}
+        <View style={styles.profileHeader}>
+          <LinearGradient
+            colors={["#667eea", "#764ba2"]}
+            style={styles.profileGradient}
+          >
             <View style={styles.profileInfo}>
-              <Text style={styles.userName}>{user?.name || "User Name"}</Text>
-              <Text style={styles.userEmail}>{user?.email || "user@example.com"}</Text>
-              <View style={styles.userTypeBadge}>
-                <Text style={styles.userTypeText}>
-                  {user?.type?.charAt(0).toUpperCase() + user?.type?.slice(1) || "Patient"}
+              <View style={styles.avatarContainer}>
+                <View style={styles.avatar}>
+                  <Ionicons name="person" size={40} color="white" />
+                </View>
+                <TouchableOpacity style={styles.editAvatarButton}>
+                  <Ionicons name="camera" size={16} color="#667eea" />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.profileDetails}>
+                <Text style={styles.profileName}>
+                  {user?.name || "Patient Name"}
+                </Text>
+                <Text style={styles.profileEmail}>
+                  {user?.email || "patient@example.com"}
+                </Text>
+                <Text style={styles.profilePhone}>
+                  {user?.phone || "+27 73 993 1734"}
                 </Text>
               </View>
             </View>
-          </View>
-        </LinearGradient>
-      </View>
+          </LinearGradient>
+        </View>
 
-      {/* Profile Sections */}
-      <View style={styles.sectionsContainer}>
+        {/* Profile Sections */}
         {profileSections.map((section, sectionIndex) => (
-          <View key={sectionIndex} style={styles.section}>
+          <View key={section.title} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
             <View style={styles.sectionContent}>
               {section.items.map((item, itemIndex) => (
                 <TouchableOpacity
                   key={item.id}
-                  style={styles.menuItem}
+                  style={styles.profileItem}
                   onPress={item.onPress}
-                  activeOpacity={0.7}
                   disabled={item.type === "switch"}
                 >
-                  <View style={[styles.menuIcon, { backgroundColor: item.color + "20" }]}>
-                    <Ionicons name={item.icon} size={20} color={item.color} />
+                  <View style={styles.itemLeft}>
+                    <View
+                      style={[
+                        styles.itemIcon,
+                        { backgroundColor: item.color },
+                      ]}
+                    >
+                      <Ionicons name={item.icon} size={20} color="white" />
+                    </View>
+                    <View style={styles.itemContent}>
+                      <Text style={styles.itemTitle}>{item.title}</Text>
+                      <Text style={styles.itemSubtitle}>{item.subtitle}</Text>
+                    </View>
                   </View>
-                  <View style={styles.menuContent}>
-                    <Text style={styles.menuTitle}>{item.title}</Text>
-                    <Text style={styles.menuSubtitle}>{item.subtitle}</Text>
+                  <View style={styles.itemRight}>
+                    {item.type === "switch" ? (
+                      <Switch
+                        value={item.value}
+                        onValueChange={item.onValueChange}
+                        trackColor={{ false: "#E5E7EB", true: item.color }}
+                        thumbColor="white"
+                        ios_backgroundColor="#E5E7EB"
+                      />
+                    ) : (
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color="#9CA3AF"
+                      />
+                    )}
                   </View>
-                  {item.type === "switch" ? (
-                    <Switch
-                      value={item.value}
-                      onValueChange={item.onValueChange}
-                      trackColor={{ false: "#E5E7EB", true: item.color }}
-                      thumbColor="#fff"
-                      ios_backgroundColor="#E5E7EB"
-                    />
-                  ) : (
-                    <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-                  )}
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         ))}
-      </View>
 
-      {/* Logout Button */}
-      <View style={styles.logoutContainer}>
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={() => {
-            Alert.alert(
-              "Logout",
-              "Are you sure you want to logout?",
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Logout",
-                  style: "destructive",
-                  onPress: () => {
-                    // Handle logout
-                    console.log("Logout from profile");
+        {/* Logout Button */}
+        <View style={styles.logoutSection}>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={() => {
+              Alert.alert(
+                "Logout",
+                "Are you sure you want to logout?",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Logout",
+                    style: "destructive",
+                    onPress: async () => {
+                      const result = await updateUser(null);
+                      if (result.success) {
+                        console.log("Logout successful");
+                      } else {
+                        console.log("Logout failed:", result.error);
+                      }
+                    },
                   },
-                },
-              ]
-            );
-          }}
-        >
-          <LinearGradient
-            colors={["#EF4444", "#DC2626"]}
-            style={styles.logoutGradient}
+                ]
+              );
+            }}
           >
-            <Ionicons name="log-out" size={20} color="#fff" />
+            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
             <Text style={styles.logoutText}>Logout</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
-
-      {/* Bottom Spacing */}
-      <View style={{ height: 100 }} />
-    </ScrollView>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
+  content: {
+    paddingBottom: 100, // Extra padding for bottom navigation
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937",
-  },
-  editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  profileCard: {
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 20,
-    overflow: "hidden",
-    elevation: 4,
-    shadowColor: "#667eea",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+  profileHeader: {
+    marginBottom: 24,
   },
   profileGradient: {
     padding: 24,
   },
-  profileContent: {
+  profileInfo: {
+    flexDirection: "row",
     alignItems: "center",
   },
   avatarContainer: {
     position: "relative",
-    marginBottom: 16,
+    marginRight: 16,
   },
   avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   editAvatarButton: {
     position: "absolute",
@@ -365,112 +328,117 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#667eea",
+    backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: "#667eea",
   },
-  profileInfo: {
-    alignItems: "center",
+  profileDetails: {
+    flex: 1,
   },
-  userName: {
+  profileName: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#fff",
+    color: "white",
     marginBottom: 4,
   },
-  userEmail: {
+  profileEmail: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.9)",
-    marginBottom: 8,
+    color: "rgba(255, 255, 255, 0.9)",
+    marginBottom: 2,
   },
-  userTypeBadge: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  userTypeText: {
+  profilePhone: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  sectionsContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    color: "rgba(255, 255, 255, 0.8)",
   },
   section: {
     marginBottom: 24,
+    paddingHorizontal: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#1F2937",
     marginBottom: 12,
   },
   sectionContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "white",
     borderRadius: 16,
     overflow: "hidden",
-    elevation: 2,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  menuItem: {
+  profileItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
+    justifyContent: "space-between",
     paddingVertical: 16,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",
   },
-  menuIcon: {
+  itemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  itemIcon: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
   },
-  menuContent: {
+  itemContent: {
     flex: 1,
   },
-  menuTitle: {
+  itemTitle: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#1F2937",
     marginBottom: 2,
   },
-  menuSubtitle: {
+  itemSubtitle: {
     fontSize: 14,
     color: "#6B7280",
   },
-  logoutContainer: {
+  itemRight: {
+    marginLeft: 12,
+  },
+  logoutSection: {
     paddingHorizontal: 20,
-    marginTop: 20,
+    marginBottom: 24,
   },
   logoutButton: {
-    borderRadius: 12,
-    overflow: "hidden",
-    elevation: 2,
-    shadowColor: "#EF4444",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-  },
-  logoutGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "white",
     paddingVertical: 16,
-    gap: 8,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#FEE2E2",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   logoutText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#fff",
+    color: "#EF4444",
+    marginLeft: 8,
   },
 }); 

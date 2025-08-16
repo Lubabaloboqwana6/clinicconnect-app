@@ -37,3 +37,34 @@ app.config.js
 
 # typescript
 *.tsbuildinfo
+
+# 🔒 SECURITY: API Keys and Sensitive Files
+app.config.js
+scripts/serviceAccountKey.json
+.env
+.env.local
+.env.production
+.env.development
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
+.firebase/
+
+# Build artifacts
+build/
+dist/
+*.apk
+*.aab
+*.ipa
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini

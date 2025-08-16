@@ -6,7 +6,7 @@ import { Header } from "../components/Header";
 import { useApp } from "../context/AppContext";
 import { styles } from "../styles/ScreenStyles";
 
-export const AppointmentsScreen = ({ onNavigate }) => {
+export const AppointmentsScreen = ({ onNavigate, onMenuPress }) => {
   const {
     appointments,
     refreshAppointments,
@@ -165,7 +165,7 @@ export const AppointmentsScreen = ({ onNavigate }) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <Header title="Appointments" onNavigate={onNavigate} />
+        <Header title="Appointments" onNavigate={onNavigate} onMenuPress={onMenuPress} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading appointments...</Text>
         </View>
@@ -175,7 +175,7 @@ export const AppointmentsScreen = ({ onNavigate }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Appointments" onNavigate={onNavigate} />
+      <Header title="Appointments" onNavigate={onNavigate} onMenuPress={onMenuPress} />
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}

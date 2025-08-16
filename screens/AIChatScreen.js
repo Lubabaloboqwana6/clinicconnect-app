@@ -22,11 +22,11 @@ import { styles } from "../styles/ScreenStyles";
 
 const { height } = Dimensions.get("window");
 
-export const AIChatScreen = ({ onNavigate }) => {
+export const AIChatScreen = ({ onNavigate, onMenuPress }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI Health Assistant powered by Google Gemini. 👋\n\nI'm here to help with health questions, guide you to appropriate care, and assist with using ClinicConnect+. How are you feeling today?",
+      text: "Hello! I'm your intelligent AI Health Assistant powered by Google Gemini. 👋\n\nI can help you with:\n• Understanding symptoms and health concerns\n• Providing evidence-based health information\n• Guiding you to appropriate healthcare services\n• Offering wellness and prevention tips\n• Helping you navigate ClinicConnect+ features\n\n💡 Remember: I provide general guidance only. Always consult healthcare professionals for medical advice.\n\nHow are you feeling today?",
       isBot: true,
       timestamp: new Date(),
       type: "greeting",
@@ -42,10 +42,10 @@ export const AIChatScreen = ({ onNavigate }) => {
     { id: 2, text: "I have a headache", icon: "medical-outline" },
     { id: 3, text: "Fever symptoms", icon: "thermometer-outline" },
     { id: 4, text: "Stomach pain", icon: "body-outline" },
-    { id: 5, text: "Find nearby clinics", icon: "location-outline" },
-    { id: 6, text: "Book appointment", icon: "calendar-outline" },
-    { id: 7, text: "Health tips", icon: "heart-outline" },
-    { id: 8, text: "Emergency help", icon: "warning-outline" },
+    { id: 5, text: "Chest pain", icon: "heart-outline" },
+    { id: 6, text: "Mental health", icon: "happy-outline" },
+    { id: 7, text: "Find nearby clinics", icon: "location-outline" },
+    { id: 8, text: "Health tips", icon: "heart-outline" },
   ];
 
   const [currentQuickReplies, setCurrentQuickReplies] = useState(quickReplies);
@@ -145,7 +145,7 @@ export const AIChatScreen = ({ onNavigate }) => {
     const input = userInput.toLowerCase();
     let newReplies = [];
 
-    // Contextual quick replies based on conversation
+    // Enhanced contextual quick replies based on conversation
     if (input.includes("headache") || input.includes("head")) {
       newReplies = [
         { id: 1, text: "Mild headache", icon: "happy-outline" },
@@ -153,6 +153,7 @@ export const AIChatScreen = ({ onNavigate }) => {
         { id: 3, text: "With nausea", icon: "medical-outline" },
         { id: 4, text: "How long?", icon: "time-outline" },
         { id: 5, text: "Find clinics", icon: "location-outline" },
+        { id: 6, text: "Book appointment", icon: "calendar-outline" },
       ];
     } else if (input.includes("fever") || input.includes("temperature")) {
       newReplies = [
@@ -161,6 +162,7 @@ export const AIChatScreen = ({ onNavigate }) => {
         { id: 3, text: "How long?", icon: "time-outline" },
         { id: 4, text: "Emergency help", icon: "medical-outline" },
         { id: 5, text: "Find clinics", icon: "location-outline" },
+        { id: 6, text: "Book appointment", icon: "calendar-outline" },
       ];
     } else if (input.includes("stomach") || input.includes("nausea")) {
       newReplies = [
@@ -169,6 +171,23 @@ export const AIChatScreen = ({ onNavigate }) => {
         { id: 3, text: "How long?", icon: "time-outline" },
         { id: 4, text: "Getting worse", icon: "trending-up-outline" },
         { id: 5, text: "Book appointment", icon: "calendar-outline" },
+        { id: 6, text: "Find clinics", icon: "location-outline" },
+      ];
+    } else if (input.includes("chest") || input.includes("heart")) {
+      newReplies = [
+        { id: 1, text: "Severe chest pain", icon: "heart" },
+        { id: 2, text: "Difficulty breathing", icon: "medical-outline" },
+        { id: 3, text: "Emergency help", icon: "warning-outline" },
+        { id: 4, text: "Find nearest clinic", icon: "location-outline" },
+        { id: 5, text: "Call 10177", icon: "call-outline" },
+      ];
+    } else if (input.includes("mental") || input.includes("anxiety") || input.includes("depression")) {
+      newReplies = [
+        { id: 1, text: "Feeling anxious", icon: "sad-outline" },
+        { id: 2, text: "Depression symptoms", icon: "medical-outline" },
+        { id: 3, text: "Stress management", icon: "heart-outline" },
+        { id: 4, text: "Find counselor", icon: "location-outline" },
+        { id: 5, text: "Mental health support", icon: "people-outline" },
       ];
     } else if (input.includes("clinic") || input.includes("appointment")) {
       newReplies = [
@@ -176,21 +195,31 @@ export const AIChatScreen = ({ onNavigate }) => {
         { id: 2, text: "Book appointment", icon: "calendar-outline" },
         { id: 3, text: "Join queue", icon: "people-outline" },
         { id: 4, text: "Check wait times", icon: "time-outline" },
+        { id: 5, text: "Emergency care", icon: "medical-outline" },
+      ];
+    } else if (input.includes("medication") || input.includes("medicine")) {
+      newReplies = [
+        { id: 1, text: "Need prescription", icon: "medical-outline" },
+        { id: 2, text: "Consult pharmacist", icon: "location-outline" },
+        { id: 3, text: "Side effects", icon: "warning-outline" },
+        { id: 4, text: "Book appointment", icon: "calendar-outline" },
+        { id: 5, text: "Find clinic", icon: "location-outline" },
       ];
     } else if (botResponse.type === "urgent") {
       newReplies = [
-        { id: 1, text: "Call emergency now", icon: "call-outline" },
-        { id: 2, text: "Find nearest clinic", icon: "location-outline" },
-        { id: 3, text: "It's getting worse", icon: "warning-outline" },
+        { id: 1, text: "🚨 Call emergency now", icon: "call-outline" },
+        { id: 2, text: "🏥 Find nearest clinic", icon: "location-outline" },
+        { id: 3, text: "⚠️ It's getting worse", icon: "warning-outline" },
       ];
     } else {
-      // Default replies with health focus
+      // Enhanced default replies with health focus
       newReplies = [
         { id: 1, text: "I have symptoms", icon: "medical-outline" },
         { id: 2, text: "Need a clinic", icon: "location-outline" },
         { id: 3, text: "Book appointment", icon: "calendar-outline" },
         { id: 4, text: "Health tips", icon: "heart-outline" },
         { id: 5, text: "Emergency help", icon: "warning-outline" },
+        { id: 6, text: "Mental health", icon: "happy-outline" },
       ];
     }
 
@@ -253,7 +282,7 @@ export const AIChatScreen = ({ onNavigate }) => {
 
   return (
     <View style={styles.chatContainer}>
-      <Header title="AI Health Assistant" onNavigate={onNavigate} />
+      <Header title="AI Health Assistant" onNavigate={onNavigate} onMenuPress={onMenuPress} />
 
       {/* Connection Status Indicator */}
       <View style={styles.connectionStatusBar}>
@@ -378,11 +407,7 @@ export const AIChatScreen = ({ onNavigate }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Usage disclaimer */}
-          <Text style={styles.disclaimerText}>
-            AI responses are for informational purposes. Always consult
-            healthcare professionals for medical advice.
-          </Text>
+          {/* Removed disclaimer to clean up screen space */}
         </View>
       </KeyboardAvoidingView>
     </View>

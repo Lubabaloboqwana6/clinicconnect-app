@@ -1,7 +1,6 @@
 import {
   db,
   withFirestoreErrorHandling,
-  connectionManager,
 } from "../config/firebase";
 import {
   collection,
@@ -45,7 +44,6 @@ class QueueService {
         (snapshot) => {
           // Reset connection retry count on successful data
           this.connectionRetries = 0;
-          connectionManager.reset();
 
           if (!snapshot.empty) {
             const doc = snapshot.docs[0];

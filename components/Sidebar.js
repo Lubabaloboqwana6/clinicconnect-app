@@ -52,13 +52,12 @@ export const Sidebar = ({ visible, onClose, onNavigate }) => {
       },
     },
     {
-      id: "settings",
-      title: "Settings",
-      icon: "settings",
-      color: "#6B7280",
+      id: "analytics",
+      title: "Analytics",
+      icon: "analytics",
+      color: "#8B5CF6",
       onPress: () => {
-        // Navigate to settings screen
-        console.log("Navigate to settings");
+        onNavigate("analytics");
         onClose();
       },
     },
@@ -69,6 +68,17 @@ export const Sidebar = ({ visible, onClose, onNavigate }) => {
       color: "#F59E0B",
       onPress: () => {
         onNavigate("notifications");
+        onClose();
+      },
+    },
+    {
+      id: "settings",
+      title: "Settings",
+      icon: "settings",
+      color: "#6B7280",
+      onPress: () => {
+        // Navigate to settings screen
+        console.log("Navigate to settings");
         onClose();
       },
     },

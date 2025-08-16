@@ -20,7 +20,13 @@ export const ChatMessage = ({ message, onActionPress }) => {
         return {
           bubbleStyle: styles.urgentMessageBubble,
           textStyle: styles.urgentMessageText,
-          indicator: { color: "#EF4444", text: "URGENT" },
+          indicator: { color: "#DC2626", text: "URGENT" },
+        };
+      case "warning":
+        return {
+          bubbleStyle: styles.warningMessageBubble,
+          textStyle: styles.warningMessageText,
+          indicator: { color: "#F59E0B", text: "CONCERNING" },
         };
       case "system":
         return {
@@ -141,7 +147,7 @@ export const ChatMessage = ({ message, onActionPress }) => {
             </View>
           )}
 
-          {/* Emergency Alert for Urgent Messages */}
+          {/* Emergency Alert for Truly Urgent Messages */}
           {message.type === "urgent" && (
             <View style={styles.emergencyAlert}>
               <View style={styles.emergencyAlertHeader}>
@@ -169,8 +175,43 @@ export const ChatMessage = ({ message, onActionPress }) => {
                     onActionPress({ action: "navigate", target: "clinics" })
                   }
                 >
-                  <Ionicons name="location" size={16} color="#EF4444" />
+                  <Ionicons name="location" size={16} color="#DC2626" />
                   <Text style={styles.emergencyFindText}>Find Clinic</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {/* Warning Alert for Concerning but Less Urgent Messages */}
+          {message.type === "warning" && (
+            <View style={styles.warningAlert}>
+              <View style={styles.warningAlertHeader}>
+                <Ionicons name="medical" size={18} color="#F59E0B" />
+                <Text style={styles.warningAlertTitle}>
+                  ⚠️ Health Concern
+                </Text>
+              </View>
+              <Text style={styles.warningAlertText}>
+                This may require medical attention. Consider consulting with a healthcare provider.
+              </Text>
+              <View style={styles.warningActions}>
+                <TouchableOpacity
+                  style={styles.warningFindButton}
+                  onPress={() =>
+                    onActionPress({ action: "navigate", target: "clinics" })
+                  }
+                >
+                  <Ionicons name="location" size={16} color="#F59E0B" />
+                  <Text style={styles.warningFindText}>Find Clinic</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.warningBookButton}
+                  onPress={() =>
+                    onActionPress({ action: "navigate", target: "clinics" })
+                  }
+                >
+                  <Ionicons name="calendar" size={16} color="#F59E0B" />
+                  <Text style={styles.warningBookText}>Book Appointment</Text>
                 </TouchableOpacity>
               </View>
             </View>

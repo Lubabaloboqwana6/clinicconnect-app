@@ -9,10 +9,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { NotificationCard } from "../components/NotificationCard";
+import { Header } from "../components/Header";
 import { useNotifications } from "../hooks/useNotifications";
 import { styles as appStyles } from "../styles/ScreenStyles";
 
-export const NotificationsScreen = ({ onNavigate }) => {
+export const NotificationsScreen = ({ onNavigate, onMenuPress }) => {
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const [filter, setFilter] = useState("all"); // all, unread, read
 
@@ -85,100 +86,127 @@ export const NotificationsScreen = ({ onNavigate }) => {
 
   return (
     <View style={appStyles.container}>
-      {/* Simple Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => onNavigate("home")}
-        >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
-        </TouchableOpacity>
-        <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Notifications</Text>
-          <Text style={styles.headerSubtitle}>
-            {unreadCount > 0 
-              ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
-              : "All caught up!"
-            }
-          </Text>
+      <Header 
+        title="Notifications"
+        onNavigate={onNavigate}
+        onMenuPress={onMenuPress}
+      />
+
+      {/* Filter Controls */}
+      <View style={styles.filterContainer}>
+        <View style={styles.filterButtons}>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filter === "all" && styles.filterButtonActive,
+            ]}
+            onPress={() => setFilter("all")}
+          >
+            <Text
+              style={[
+                styles.filterButtonText,
+                filter === "all" && styles.filterButtonTextActive,
+              ]}
+            >
+              All ({notifications.length})
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filter === "unread" && styles.filterButtonActive,
+            ]}
+            onPress={() => setFilter("unread")}
+          >
+            <Text
+              style={[
+                styles.filterButtonText,
+                filter === "unread" && styles.filterButtonTextActive,
+              ]}
+            >
+              Unread ({unreadCount})
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              filter === "read" && styles.filterButtonActive,
+            ]}
+            onPress={() => setFilter("read")}
+          >
+            <Text
+              style={[
+                styles.filterButtonText,
+                filter === "read" && styles.filterButtonTextActive,
+              ]}
+            >
+              Read ({notifications.filter(n => n.read).length})
+            </Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.headerActions}>
-          {unreadCount > 0 && (
+
+        {notifications.length > 0 && (
+          <View style={styles.actionButtons}>
             <TouchableOpacity
               style={styles.actionButton}
               onPress={handleMarkAllAsRead}
             >
-              <Ionicons name="checkmark-done" size={20} color="#667eea" />
+              <Ionicons name="checkmark-done" size={16} color="#667eea" />
+              <Text style={styles.actionButtonText}>Mark All Read</Text>
             </TouchableOpacity>
-          )}
-          {notifications.length > 0 && (
+
             <TouchableOpacity
-              style={styles.actionButton}
+              style={[styles.actionButton, styles.clearButton]}
               onPress={handleClearAll}
             >
-              <Ionicons name="trash" size={20} color="#EF4444" />
+              <Ionicons name="trash-outline" size={16} color="#EF4444" />
+              <Text style={[styles.actionButtonText, styles.clearButtonText]}>
+                Clear All
+              </Text>
             </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      {/* Filter Tabs */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterButton, filter === "all" && styles.activeFilterButton]}
-          onPress={() => setFilter("all")}
-        >
-          <Text style={[styles.filterButtonText, filter === "all" && styles.activeFilterButtonText]}>
-            All ({notifications.length})
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.filterButton, filter === "unread" && styles.activeFilterButton]}
-          onPress={() => setFilter("unread")}
-        >
-          <Text style={[styles.filterButtonText, filter === "unread" && styles.activeFilterButtonText]}>
-            Unread ({unreadCount})
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.filterButton, filter === "read" && styles.activeFilterButton]}
-          onPress={() => setFilter("read")}
-        >
-          <Text style={[styles.filterButtonText, filter === "read" && styles.activeFilterButtonText]}>
-            Read ({notifications.filter(n => n.read).length})
-          </Text>
-        </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       {/* Notifications List */}
       <ScrollView
-        style={styles.notificationsList}
+        style={styles.notificationsContainer}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.notificationsContent}
       >
-        {filteredNotifications.length === 0 ? (
+        {filteredNotifications.length > 0 ? (
+          filteredNotifications.map((notification) => (
+            <NotificationCard
+              key={notification.id}
+              notification={notification}
+              onPress={() => handleNotificationPress(notification)}
+              onDelete={() => handleDeleteNotification(notification.id)}
+            />
+          ))
+        ) : (
           <View style={styles.emptyState}>
-            <Ionicons name="notifications-off" size={64} color="#D1D5DB" />
-            <Text style={styles.emptyTitle}>No notifications</Text>
-            <Text style={styles.emptyMessage}>
+            <Ionicons
+              name="notifications-off-outline"
+              size={64}
+              color="#9CA3AF"
+            />
+            <Text style={styles.emptyStateTitle}>
               {filter === "all"
-                ? "You don't have any notifications yet."
+                ? "No Notifications"
+                : filter === "unread"
+                ? "No Unread Notifications"
+                : "No Read Notifications"}
+            </Text>
+            <Text style={styles.emptyStateSubtitle}>
+              {filter === "all"
+                ? "You'll see notifications here when you have updates."
                 : filter === "unread"
                 ? "All caught up! No unread notifications."
                 : "No read notifications to show."}
             </Text>
           </View>
-        ) : (
-          filteredNotifications.map((notification) => (
-            <NotificationCard
-              key={notification.id}
-              notification={notification}
-              onPress={handleNotificationPress}
-              onDelete={handleDeleteNotification}
-            />
-          ))
         )}
       </ScrollView>
     </View>
@@ -186,59 +214,16 @@ export const NotificationsScreen = ({ onNavigate }) => {
 };
 
 const styles = StyleSheet.create({
-  // Simple Header
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
+  filterContainer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  headerContent: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1F2937",
-    marginBottom: 2,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: "#6B7280",
-  },
-  headerActions: {
+  filterButtons: {
     flexDirection: "row",
-    gap: 8,
-  },
-  actionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F3F4F6",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  // Filter Tabs
-  filterContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    marginBottom: 12,
   },
   filterButton: {
     flex: 1,
@@ -249,25 +234,47 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6",
     alignItems: "center",
   },
-  activeFilterButton: {
+  filterButtonActive: {
     backgroundColor: "#667eea",
   },
   filterButtonText: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#6B7280",
   },
-  activeFilterButtonText: {
-    color: "#FFFFFF",
+  filterButtonTextActive: {
+    color: "white",
   },
-
-  // Notifications List
-  notificationsList: {
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#667eea",
+    marginLeft: 4,
+  },
+  clearButton: {
+    backgroundColor: "#FEF2F2",
+  },
+  clearButtonText: {
+    color: "#EF4444",
+  },
+  notificationsContainer: {
     flex: 1,
+    backgroundColor: "#F9FAFB",
   },
   notificationsContent: {
-    padding: 16,
-    paddingBottom: 100, // Extra padding for bottom navigation
+    padding: 20,
   },
   emptyState: {
     flex: 1,
@@ -275,18 +282,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 60,
   },
-  emptyTitle: {
+  emptyStateTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#374151",
     marginTop: 16,
     marginBottom: 8,
   },
-  emptyMessage: {
+  emptyStateSubtitle: {
     fontSize: 14,
     color: "#6B7280",
     textAlign: "center",
     lineHeight: 20,
-    paddingHorizontal: 32,
   },
 }); 

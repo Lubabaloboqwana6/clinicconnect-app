@@ -1472,6 +1472,18 @@ export const styles = StyleSheet.create({
     backgroundColor: "#FEF2F2",
     borderColor: "#FECACA",
   },
+  warningMessageBubble: {
+    backgroundColor: "#FFFBEB",
+    borderColor: "#FED7AA",
+  },
+  systemMessageBubble: {
+    backgroundColor: "#F0F9FF",
+    borderColor: "#BAE6FD",
+  },
+  errorMessageBubble: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FECACA",
+  },
   botMessageText: {
     fontSize: 16,
     color: "#1F2937",
@@ -1481,10 +1493,250 @@ export const styles = StyleSheet.create({
   urgentMessageText: {
     color: "#991B1B",
   },
+  warningMessageText: {
+    color: "#92400E",
+  },
+  systemMessageText: {
+    color: "#0369A1",
+  },
+  errorMessageText: {
+    color: "#DC2626",
+  },
   messageTime: {
     fontSize: 12,
     color: "#6B7280",
     textAlign: "right",
+  },
+
+  // Response Type Indicators
+  responseTypeIndicator: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+
+  responseTypeText: {
+    fontSize: 10,
+    color: "#fff",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+
+  // Conversation Context Styles
+  conversationContext: {
+    backgroundColor: "#F0F9FF",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: "#0EA5E9",
+  },
+
+  contextTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#0369A1",
+    marginBottom: 4,
+  },
+
+  contextText: {
+    fontSize: 12,
+    color: "#0284C7",
+    lineHeight: 16,
+  },
+
+  // Health Topic Pills
+  healthTopicPill: {
+    backgroundColor: "#ECFDF5",
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+  },
+
+  healthTopicText: {
+    fontSize: 12,
+    color: "#065F46",
+    fontWeight: "500",
+  },
+
+  // Memory Indicator
+  memoryIndicator: {
+    backgroundColor: "#F0F9FF",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: "flex-start",
+    marginBottom: 8,
+  },
+
+  memoryText: {
+    fontSize: 11,
+    color: "#0284C7",
+    fontWeight: "500",
+  },
+
+  // Emergency Alert Styles
+  emergencyAlert: {
+    backgroundColor: "#FEF2F2",
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: "#EF4444",
+    elevation: 4,
+    shadowColor: "#EF4444",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+
+  emergencyAlertHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  emergencyAlertTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#DC2626",
+    flex: 1,
+  },
+
+  emergencyAlertText: {
+    fontSize: 14,
+    color: "#991B1B",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+
+  emergencyActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  emergencyCallButton: {
+    flex: 1,
+    backgroundColor: "#EF4444",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  emergencyCallText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  emergencyFindButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#DC2626",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  emergencyFindText: {
+    color: "#DC2626",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+
+  // Warning Alert Styles (for concerning but less urgent situations)
+  warningAlert: {
+    backgroundColor: "#FFFBEB",
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#F59E0B",
+    elevation: 2,
+    shadowColor: "#F59E0B",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+
+  warningAlertHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+
+  warningAlertTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#D97706",
+    flex: 1,
+  },
+
+  warningAlertText: {
+    fontSize: 14,
+    color: "#92400E",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+
+  warningActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  warningFindButton: {
+    flex: 1,
+    backgroundColor: "#F59E0B",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  warningFindText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  warningBookButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#F59E0B",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  warningBookText: {
+    color: "#F59E0B",
+    fontWeight: "600",
+    fontSize: 14,
   },
 
   // User Message Styles
@@ -1551,23 +1803,27 @@ export const styles = StyleSheet.create({
   quickReplyButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 20,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 18,
+    borderTopLeftRadius: 4,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#E2E8F0",
     gap: 8,
-    elevation: 1,
-    shadowColor: "#000",
+    elevation: 2,
+    shadowColor: "#667eea",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    marginHorizontal: 4,
+    marginVertical: 2,
   },
   quickReplyText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#374151",
+    lineHeight: 18,
   },
 
   // Typing Indicator Styles

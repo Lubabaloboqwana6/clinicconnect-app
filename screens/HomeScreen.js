@@ -19,10 +19,9 @@ import { styles } from "../styles/ScreenStyles";
 
 const { width } = Dimensions.get("window");
 
-export const HomeScreen = ({ onNavigate }) => {
+export const HomeScreen = ({ onNavigate, onMenuPress }) => {
   const { userQueue } = useApp();
   const { user, logout } = useAuth();
-  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -78,13 +77,13 @@ export const HomeScreen = ({ onNavigate }) => {
   ];
 
   return (
-    <>
+    <View style={styles.container}>
+      <Header 
+        onNavigate={onNavigate} 
+        onMenuPress={onMenuPress}
+      />
+      
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Header 
-          onNavigate={onNavigate} 
-          onMenuPress={() => setSidebarVisible(true)}
-        />
-
         {/* Welcome Section */}
         <View style={styles.welcomeSection}>
           <View style={styles.welcomeHeader}>
@@ -159,13 +158,6 @@ export const HomeScreen = ({ onNavigate }) => {
           </View>
         </View>
       </ScrollView>
-
-      {/* Sidebar */}
-      <Sidebar
-        visible={sidebarVisible}
-        onClose={() => setSidebarVisible(false)}
-        onNavigate={onNavigate}
-      />
-    </>
+    </View>
   );
 };

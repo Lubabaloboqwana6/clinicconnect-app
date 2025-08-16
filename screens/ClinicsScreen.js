@@ -23,6 +23,7 @@ export const ClinicsScreen = ({
   onNavigate,
   onShowBookingModal,
   onShowQueueModal,
+  onMenuPress,
 }) => {
   const {
     searchQuery,
@@ -191,7 +192,7 @@ export const ClinicsScreen = ({
   if (loading) {
     return (
       <View style={styles.container}>
-        <Header title="Find Clinics" onNavigate={onNavigate} />
+        <Header title="Find Clinics" onNavigate={onNavigate} onMenuPress={onMenuPress} />
         <LoadingSpinner message="Loading clinics..." showGradient={true} />
       </View>
     );
@@ -201,7 +202,7 @@ export const ClinicsScreen = ({
   if (error) {
     return (
       <View style={styles.container}>
-        <Header title="Find Clinics" onNavigate={onNavigate} />
+        <Header title="Find Clinics" onNavigate={onNavigate} onMenuPress={onMenuPress} />
         <ErrorMessage
           message={error}
           onRetry={handleRetry}
@@ -214,7 +215,7 @@ export const ClinicsScreen = ({
 
   return (
     <View style={styles.container}>
-      <Header title="Find Clinics" onNavigate={onNavigate} />
+      <Header title="Find Clinics" onNavigate={onNavigate} onMenuPress={onMenuPress} />
 
       {/* Search Header */}
       <View style={styles.searchHeader}>
