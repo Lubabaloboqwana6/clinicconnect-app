@@ -18,27 +18,28 @@ import {
 } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Firebase config
-const firebaseConfig = Constants.expoConfig.extra.firebase;
+// Firebase config with safety checks
+const firebaseConfig = Constants.expoConfig?.extra?.firebase;
 
-// Ensure app is initialized once
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+if (!firebaseConfig || !firebaseConfig.apiKey) {
+  console.warn(
+    "⚠️ Firebase configuration is missing or incomplete. Ensure app.config.js has extra.firebase with a valid apiKey."
+  );
+}
 
-// ✅ Enhanced Auth Setup with Better Error Handling
+// Ensure app is initialized once (only if config present)
+const app = getApps().length === 0 ? initializeApp(firebaseConfig || {}) : getApp();
+
+// ✅ Auth Setup: prefer initializeAuth with persistence first to avoid warnings
 let auth;
 try {
-  // Try to get existing auth instance
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
+} catch (e) {
+  // If already initialized (web/ios/android), fall back to getAuth
+  console.warn("Auth initialization warning:", e.message);
   auth = getAuth(app);
-} catch {
-  try {
-    // Initialize auth with AsyncStorage persistence for React Native
-    auth = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
-  } catch (e) {
-    console.warn("Auth initialization warning:", e.message);
-    auth = getAuth(app); // Fallback
-  }
 }
 
 // ✅ Enhanced Firestore Setup with Connection Management
