@@ -17,7 +17,7 @@ import { ChatMessage } from "../components/ChatMessage";
 import { QuickReply } from "../components/QuickReply";
 import { TypingIndicator } from "../components/TypingIndicator";
 import { useApp } from "../context/AppContext";
-import { geminiService } from "../services/geminiService"; // Import Gemini service
+import { deepseekService } from "../services/deepseekService"; // Import DeepSeek service
 import { styles } from "../styles/ScreenStyles";
 
 const { height } = Dimensions.get("window");
@@ -26,7 +26,7 @@ export const AIChatScreen = ({ onNavigate, onMenuPress }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your intelligent AI Health Assistant powered by Google Gemini. 👋\n\nI can help you with:\n• Understanding symptoms and health concerns\n• Providing evidence-based health information\n• Guiding you to appropriate healthcare services\n• Offering wellness and prevention tips\n• Helping you navigate ClinicConnect+ features\n\n💡 Remember: I provide general guidance only. Always consult healthcare professionals for medical advice.\n\nHow are you feeling today?",
+      text: "Hello! I'm your intelligent AI Health Assistant powered by DeepSeek. 👋\n\nI can help you with:\n• Understanding symptoms and health concerns\n• Providing evidence-based health information\n• Guiding you to appropriate healthcare services\n• Offering wellness and prevention tips\n• Helping you navigate ClinicConnect+ features\n\n💡 Remember: I provide general guidance only. Always consult healthcare professionals for medical advice.\n\nHow are you feeling today?",
       isBot: true,
       timestamp: new Date(),
       type: "greeting",
@@ -62,14 +62,14 @@ export const AIChatScreen = ({ onNavigate, onMenuPress }) => {
   const testAIConnection = async () => {
     try {
       setConnectionStatus("checking");
-      const result = await geminiService.testConnection();
+      const result = await deepseekService.testConnection();
 
       if (result.success) {
         setConnectionStatus("connected");
-        console.log("✅ Gemini AI service connected successfully");
+        console.log("✅ DeepSeek AI service connected successfully");
       } else {
         setConnectionStatus("error");
-        console.warn("⚠️ Gemini AI service connection failed:", result.message);
+        console.warn("⚠️ DeepSeek AI service connection failed:", result.message);
 
         // Add a system message about fallback mode
         const fallbackMessage = {
@@ -109,7 +109,7 @@ export const AIChatScreen = ({ onNavigate, onMenuPress }) => {
 
     try {
       // Generate AI response using Gemini service
-      const botResponse = await geminiService.generateResponse(
+      const botResponse = await deepseekService.generateResponse(
         messages,
         text.trim()
       );

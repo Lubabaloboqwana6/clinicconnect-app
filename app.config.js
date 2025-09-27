@@ -19,9 +19,9 @@ export default ({ config }) => ({
       appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef",
       measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-XXXXXXXXXX",
     },
-    gemini: {
-      apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY || "demo-gemini-key",
-      model: "gemini-2.5-flash",
+    deepseek: {
+      apiKey: process.env.EXPO_PUBLIC_DEEPSEEK_API_KEY || "demo-deepseek-key",
+      model: "deepseek-chat",
       maxTokens: 512,
       temperature: 0.7,
     },
