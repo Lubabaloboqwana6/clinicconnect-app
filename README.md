@@ -1,42 +1,51 @@
-# ClinicConnect+ Mobile App
+# ClinicConnect Mobile App
 
-A comprehensive healthcare management mobile application built with React Native and Expo, designed to connect patients with healthcare providers in South Africa.
+A comprehensive healthcare management mobile application built with React Native and Expo, designed to connect patients with clinics and streamline healthcare services.
 
-## 🚨 SECURITY NOTICE
+## 🏥 Features
 
-**IMPORTANT**: This repository contains sensitive configuration files that should NEVER be committed to version control. Always use environment variables or secure configuration management for API keys and credentials.
+### Patient Features
+- **Clinic Discovery**: Find nearby clinics with real-time availability
+- **Appointment Booking**: Schedule appointments with healthcare providers
+- **Queue Management**: Join virtual queues and receive real-time updates
+- **AI-Powered Symptom Checker**: Get preliminary health insights using AI
+- **Notifications**: Stay updated with appointment reminders and queue status
+- **Profile Management**: Manage personal health information
 
-## 🏗️ Project Structure
+### Clinic Features
+- **Queue Management**: Monitor and manage patient queues
+- **Appointment Scheduling**: Handle appointment bookings and modifications
+- **Analytics Dashboard**: Track clinic performance and patient flow
+- **Patient Communication**: Send notifications and updates to patients
 
-```
-clinicconnect-app-Main/
-├── components/          # Reusable UI components
-├── config/             # Configuration files (Firebase, environment)
-├── context/            # React Context providers
-├── data/               # Mock data and data utilities
-├── hooks/              # Custom React hooks
-├── screens/            # Main application screens
-├── services/           # API and external service integrations
-├── styles/             # Global styling and theme
-└── utils/              # Utility functions and helpers
-```
+## 🚀 Tech Stack
 
-## 🚀 Getting Started
+- **Frontend**: React Native with Expo
+- **Backend**: Firebase (Firestore, Authentication, Analytics)
+- **AI Integration**: OpenAI GPT & Google Gemini
+- **State Management**: React Context API
+- **Navigation**: React Navigation
+- **Icons**: Custom ClinicConnect branding
+
+## 📱 Screenshots
+
+*Add screenshots of your app here*
+
+## 🛠️ Installation & Setup
 
 ### Prerequisites
-
 - Node.js (v18 or higher)
 - npm or yarn
-- Expo CLI (`npm install -g @expo/cli`)
-- iOS Simulator (for iOS development)
+- Expo CLI
 - Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
 
-### Installation
+### Installation Steps
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd clinicconnect-app-Main
+   git clone https://github.com/Lubabaloboqwana6/clinicconnect-app.git
+   cd clinicconnect-app
    ```
 
 2. **Install dependencies**
@@ -44,117 +53,76 @@ clinicconnect-app-Main/
    npm install
    ```
 
-3. **Configuration Setup**
-   ```bash
-   # Copy the example configuration
-   cp app.config.example.js app.config.js
-   
-   # Edit app.config.js with your actual API keys
-   # NEVER commit this file to version control
-   ```
+3. **Environment Setup**
+   - Copy `.env.example` to `.env`
+   - Add your Firebase configuration
+   - Add your API keys for OpenAI and Gemini
 
 4. **Start the development server**
    ```bash
-   npm start
+   npx expo start
    ```
 
-## 🔐 Configuration
+5. **Run on device/emulator**
+   - Press `a` for Android emulator
+   - Press `i` for iOS simulator
+   - Scan QR code with Expo Go app
 
-### Required API Keys
+## 🔧 Configuration
 
-The application requires the following API keys to function:
+### Firebase Setup
+1. Create a Firebase project
+2. Enable Firestore Database
+3. Enable Authentication
+4. Add your configuration to `.env` file
 
-- **Firebase**: For authentication, database, and cloud services
-- **OpenAI**: For AI-powered health assistance (optional)
-- **Google Gemini**: For alternative AI health assistance (optional)
-- **Google Cloud**: For speech-to-text functionality (optional)
+### API Keys
+- **OpenAI**: For AI-powered symptom checking
+- **Google Gemini**: Alternative AI service
+- **Firebase**: For backend services
 
-### Environment Setup
+## 📦 Building for Production
 
-1. Create your `app.config.js` file based on `app.config.example.js`
-2. Fill in your actual API keys and configuration
-3. Ensure `app.config.js` is in your `.gitignore`
-
-## 🏥 Features
-
-- **Patient Management**: Complete patient records and history
-- **Appointment Booking**: Schedule and manage appointments
-- **Queue Management**: Real-time patient queue system
-- **AI Health Assistant**: Powered by OpenAI and Google Gemini
-- **Clinic Finder**: Locate nearby healthcare facilities
-- **Notifications**: Real-time updates and alerts
-- **Analytics**: Healthcare insights and reporting
-
-## 🛠️ Development
-
-### Available Scripts
-
-- `npm start` - Start Expo development server
-- `npm run android` - Run on Android device/emulator
-- `npm run ios` - Run on iOS simulator
-- `npm run web` - Run in web browser
-
-### Code Style
-
-- Use functional components with hooks
-- Follow React Native best practices
-- Implement proper error handling
-- Use TypeScript for better type safety (recommended)
-
-## 🔒 Security Best Practices
-
-1. **Never commit API keys** to version control
-2. **Use environment variables** for sensitive configuration
-3. **Implement proper authentication** and authorization
-4. **Validate all user inputs** to prevent injection attacks
-5. **Use HTTPS** for all API communications
-6. **Regularly update dependencies** to patch security vulnerabilities
-
-## 🚨 Common Issues
-
-### Firebase Connection Issues
-- Verify API keys in `app.config.js`
-- Check Firebase project settings
-- Ensure proper authentication setup
-
-### API Key Errors
-- Verify API keys are correctly configured
-- Check API quotas and billing
-- Ensure proper CORS settings
-
-## 📱 Building for Production
-
-### EAS Build
-
+### Android APK
 ```bash
-# Install EAS CLI
-npm install -g @expo/eas-cli
-
-# Configure EAS
-eas build:configure
-
-# Build for Android
-eas build --platform android
-
-# Build for iOS
-eas build --platform ios
+eas build --platform android --profile preview
 ```
 
-### Local Build
-
+### iOS App Store
 ```bash
-# Android APK
-expo run:android --variant release
-
-# iOS Archive
-expo run:ios --configuration Release
+eas build --platform ios --profile production
 ```
+
+## 🏗️ Project Structure
+
+```
+clinicconnect-app/
+├── assets/                 # Images, icons, and static assets
+├── components/             # Reusable UI components
+├── config/                 # Configuration files (Firebase, environment)
+├── context/                # React Context providers
+├── hooks/                  # Custom React hooks
+├── screens/                # App screens/pages
+├── services/               # API and business logic services
+├── styles/                 # Styling files
+├── utils/                  # Utility functions
+├── App.js                  # Main app component
+├── app.json                # Expo configuration
+└── package.json            # Dependencies and scripts
+```
+
+## 🔐 Security
+
+- Environment variables for sensitive data
+- Firebase security rules
+- API key protection
+- Secure authentication flow
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
@@ -162,19 +130,24 @@ expo run:ios --configuration Release
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 👨‍💻 Author
 
-For support and questions:
-- Create an issue in this repository
-- Contact the development team
-- Check the documentation
+**Lubabalo Boqwana**
+- GitHub: [@Lubabaloboqwana6](https://github.com/Lubabaloboqwana6)
 
-## 🔄 Version History
+## 🙏 Acknowledgments
 
-- **v1.0.0** - Initial release with core healthcare features
-- **v1.1.0** - Added AI health assistant integration
-- **v1.2.0** - Enhanced queue management and notifications
+- Expo team for the amazing development platform
+- Firebase for backend services
+- React Native community for excellent documentation
+- OpenAI and Google for AI services
+
+## 📞 Support
+
+If you have any questions or need help, please:
+- Open an issue on GitHub
+- Contact: [your-email@example.com]
 
 ---
 
-**Remember**: Always prioritize security and never expose sensitive credentials in your code! 
+**ClinicConnect** - Connecting Healthcare, One App at a Time 🏥💙
