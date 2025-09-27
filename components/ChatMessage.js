@@ -18,9 +18,9 @@ export const ChatMessage = ({ message, onActionPress }) => {
     switch (type) {
       case "urgent":
         return {
-          bubbleStyle: styles.urgentMessageBubble,
-          textStyle: styles.urgentMessageText,
-          indicator: { color: "#DC2626", text: "URGENT" },
+          bubbleStyle: styles.botMessageBubble,
+          textStyle: styles.botMessageText,
+          indicator: null,
         };
       case "warning":
         return {
@@ -116,7 +116,6 @@ export const ChatMessage = ({ message, onActionPress }) => {
                   style={[
                     styles.actionButton,
                     action.action === "emergency" && styles.emergencyButton,
-                    action.action === "urgent" && styles.urgentQuickReply,
                   ]}
                   onPress={() => onActionPress(action)}
                   activeOpacity={0.8}
@@ -137,7 +136,6 @@ export const ChatMessage = ({ message, onActionPress }) => {
                       styles.actionButtonText,
                       action.action === "emergency" &&
                         styles.emergencyButtonText,
-                      action.action === "urgent" && styles.urgentQuickReplyText,
                     ]}
                   >
                     {action.text}
@@ -147,40 +145,6 @@ export const ChatMessage = ({ message, onActionPress }) => {
             </View>
           )}
 
-          {/* Emergency Alert for Truly Urgent Messages */}
-          {message.type === "urgent" && (
-            <View style={styles.emergencyAlert}>
-              <View style={styles.emergencyAlertHeader}>
-                <Ionicons name="warning" size={20} color="#DC2626" />
-                <Text style={styles.emergencyAlertTitle}>
-                  🚨 Urgent Health Alert
-                </Text>
-              </View>
-              <Text style={styles.emergencyAlertText}>
-                This appears to be a serious health concern. Please consider
-                seeking immediate medical attention or calling emergency
-                services.
-              </Text>
-              <View style={styles.emergencyActions}>
-                <TouchableOpacity
-                  style={styles.emergencyCallButton}
-                  onPress={() => onActionPress({ action: "emergency" })}
-                >
-                  <Ionicons name="call" size={16} color="#fff" />
-                  <Text style={styles.emergencyCallText}>Call 10177</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.emergencyFindButton}
-                  onPress={() =>
-                    onActionPress({ action: "navigate", target: "clinics" })
-                  }
-                >
-                  <Ionicons name="location" size={16} color="#DC2626" />
-                  <Text style={styles.emergencyFindText}>Find Clinic</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
 
           {/* Warning Alert for Concerning but Less Urgent Messages */}
           {message.type === "warning" && (

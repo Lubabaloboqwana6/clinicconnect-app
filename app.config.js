@@ -20,8 +20,8 @@ export default ({ config }) => ({
       measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-XXXXXXXXXX",
     },
     deepseek: {
-      apiKey: process.env.EXPO_PUBLIC_DEEPSEEK_API_KEY || "demo-deepseek-key",
-      model: "deepseek-chat",
+      apiKey: process.env.EXPO_PUBLIC_DEEPSEEK_API_KEY || "demo-openrouter-key",
+      model: "meta-llama/llama-3.2-3b-instruct:free",
       maxTokens: 512,
       temperature: 0.7,
     },

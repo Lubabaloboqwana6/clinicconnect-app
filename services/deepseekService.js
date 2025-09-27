@@ -4,7 +4,7 @@ class DeepSeekService {
   constructor() {
     // Get API key from app.json extra config
     this.apiKey = Constants.expoConfig?.extra?.deepseek?.apiKey;
-    this.baseURL = "https://api.deepseek.com/v1";
+    this.baseURL = "https://openrouter.ai/api/v1";
     this.model = Constants.expoConfig?.extra?.deepseek?.model || "deepseek-chat";
 
     if (!this.apiKey) {
