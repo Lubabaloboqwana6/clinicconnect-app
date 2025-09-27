@@ -82,9 +82,12 @@ class GeminiService {
       }
 
       const data = await response.json();
+      console.log("🔍 Gemini API Response:", JSON.stringify(data, null, 2));
+      
       const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!aiResponse) {
+        console.error("❌ No text in response. Full response:", data);
         throw new Error("No response generated from Gemini");
       }
 
