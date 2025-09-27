@@ -2,10 +2,10 @@ import Constants from "expo-constants";
 
 class GeminiService {
   constructor() {
-    // Get API key from app.json extra config
+    // Get API key and model from app.json extra config
     this.apiKey = Constants.expoConfig?.extra?.gemini?.apiKey;
     this.baseURL = "https://generativelanguage.googleapis.com/v1beta";
-    this.model = "gemini-1.5-flash-latest";
+    this.model = Constants.expoConfig?.extra?.gemini?.model || "gemini-1.5-flash";
 
     if (!this.apiKey) {
       console.warn("⚠️ Gemini API key not found in configuration");
