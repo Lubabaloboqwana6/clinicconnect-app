@@ -21,9 +21,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Firebase config with safety checks
 const firebaseConfig = Constants.expoConfig?.extra?.firebase;
 
-if (!firebaseConfig || !firebaseConfig.apiKey) {
+if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "demo-api-key") {
   console.warn(
-    "⚠️ Firebase configuration is missing or incomplete. Ensure app.config.js has extra.firebase with a valid apiKey."
+    "⚠️ Firebase configuration is missing or incomplete. Using demo configuration. Please update your .env file with real Firebase credentials."
   );
 }
 

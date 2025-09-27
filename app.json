@@ -15,10 +15,13 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.lubabalo60.clinicconnect",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": []
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -26,6 +29,21 @@
     "extra": {
       "eas": {
         "projectId": "50590ee1-62ac-4451-a347-6177ffedd40d"
+      },
+      "firebase": {
+        "apiKey": "AIzaSyCxGn8fxM2TV273tbiLSUkNJ0LtXlqoUfE",
+        "authDomain": "clinicconnect-plus.firebaseapp.com",
+        "projectId": "clinicconnect-plus",
+        "storageBucket": "clinicconnect-plus.appspot.com",
+        "messagingSenderId": "450760553279",
+        "appId": "1:450760553279:web:e337b6d20595ad391ed98a",
+        "measurementId": "G-TCYJHRLKYF"
+      },
+      "gemini": {
+        "apiKey": "AIzaSyCibtwossRbkqbe0sl-aJbkfQOaZKa7e5Y",
+        "model": "gemini-1.5-flash-latest",
+        "maxTokens": 500,
+        "temperature": 0.7
       }
     }
   }
