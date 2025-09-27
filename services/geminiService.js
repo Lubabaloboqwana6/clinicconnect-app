@@ -48,7 +48,7 @@ class GeminiService {
               temperature: 0.7,
               topK: 40,
               topP: 0.95,
-              maxOutputTokens: 1000,
+              maxOutputTokens: 512,
             },
             safetySettings: [
               {
@@ -84,11 +84,26 @@ class GeminiService {
       const data = await response.json();
       console.log("🔍 Gemini API Response:", JSON.stringify(data, null, 2));
       
-      const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const candidate = data.candidates?.[0];
+      const aiResponse = candidate?.content?.parts?.[0]?.text;
 
       if (!aiResponse) {
         console.error("❌ No text in response. Full response:", data);
-        throw new Error("No response generated from Gemini");
+        
+        // Check if it's a MAX_TOKENS issue
+        if (candidate?.finishReason === "MAX_TOKENS") {
+          console.warn("⚠️ Response truncated due to token limits");
+          return this.getFallbackResponse(userInput, "token_limit");
+        }
+        
+        // Check if it's a safety filter issue
+        if (candidate?.finishReason === "SAFETY") {
+          console.warn("⚠️ Response blocked by safety filters");
+          return this.getFallbackResponse(userInput, "safety_filter");
+        }
+        
+        // Generic fallback
+        return this.getFallbackResponse(userInput, "no_response");
       }
 
       console.log("✅ Gemini AI response generated successfully");
@@ -394,6 +409,18 @@ Remember: You're an intelligent, supportive guide helping users navigate their h
           ...suggestedActions,
           { text: "📱 View Appointments", action: "navigate", target: "appointments" },
         ],
+      },
+      token_limit: {
+        text: `I'm having trouble generating a complete response right now. 🤔\n\n${contextualAdvice}\n\n💡 Tip: Try asking a shorter, more specific question, or use our clinic finder for immediate help.`,
+        actions: suggestedActions,
+      },
+      safety_filter: {
+        text: `I want to make sure I provide safe and appropriate guidance. 🛡️\n\n${contextualAdvice}\n\n💡 For sensitive health concerns, I recommend consulting directly with a healthcare professional.`,
+        actions: suggestedActions,
+      },
+      no_response: {
+        text: `Sorry, I couldn't generate a response right now. 😔\n\n${contextualAdvice}\n\n💡 Please try again with a different question, or use our clinic finder for immediate assistance.`,
+        actions: suggestedActions,
       },
       general_error: {
         text: `I'm having trouble processing your request right now. 😔\n\n${contextualAdvice}\n\n💡 Tip: You can still use our clinic finder and appointment booking features while I'm unavailable.`,

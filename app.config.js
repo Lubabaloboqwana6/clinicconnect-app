@@ -22,7 +22,7 @@ export default ({ config }) => ({
     gemini: {
       apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY || "demo-gemini-key",
       model: "gemini-2.5-flash",
-      maxTokens: 1000,
+      maxTokens: 512,
       temperature: 0.7,
     },
   },
