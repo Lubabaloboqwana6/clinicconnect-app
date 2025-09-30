@@ -19,6 +19,9 @@ export const useNotifications = () => {
   const { userQueue, appointments, updateUnreadCount } = useApp();
   const [notifications, setNotifications] = useState(baseMockNotifications);
   const [loading, setLoading] = useState(false);
+  const [processedAppointments, setProcessedAppointments] = useState(new Set());
+  const [processedQueues, setProcessedQueues] = useState(new Set());
+  const [notificationsCleared, setNotificationsCleared] = useState(false);
 
   // Calculate unread count and sync with AppContext
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -33,7 +36,7 @@ export const useNotifications = () => {
     appointment,
     action = "created"
   ) => {
-    const baseId = Date.now() + Math.random();
+    const baseId = Math.floor(Date.now() + Math.random() * 1000);
     const newNotifications = [];
 
     switch (action) {
@@ -130,7 +133,7 @@ export const useNotifications = () => {
 
   // Generate queue-related notifications
   const generateQueueNotifications = (queue, action = "joined") => {
-    const baseId = Date.now() + Math.random();
+    const baseId = Math.floor(Date.now() + Math.random() * 1000);
     const newNotifications = [];
 
     switch (action) {
@@ -213,9 +216,19 @@ export const useNotifications = () => {
 
   // Listen for new appointments
   useEffect(() => {
+    // Don't generate notifications if they were manually cleared
+    if (notificationsCleared) {
+      return;
+    }
+
     // Check for new appointments (compare with previous)
     const checkForNewAppointments = () => {
       appointments.forEach((appointment) => {
+        // Check if we already processed this appointment
+        if (processedAppointments.has(appointment.id)) {
+          return;
+        }
+
         // Check if we already have a notification for this appointment
         const existingNotification = notifications.find(
           (n) => n.linkedType === "appointment" && n.linkedId === appointment.id
@@ -232,17 +245,31 @@ export const useNotifications = () => {
               "created"
             );
             setNotifications((prev) => [...newNotifications, ...prev]);
+            // Mark this appointment as processed
+            setProcessedAppointments(prev => new Set([...prev, appointment.id]));
           }
         }
       });
     };
 
     checkForNewAppointments();
-  }, [appointments.length]); // Only run when appointments array length changes
+  }, [appointments.length, processedAppointments, notificationsCleared]); // Only run when appointments array length changes
 
   // Listen for queue changes
   useEffect(() => {
+    // Don't generate notifications if they were manually cleared
+    if (notificationsCleared) {
+      return;
+    }
+
     if (userQueue) {
+      const queueKey = `${userQueue.clinicId}_${userQueue.position}`;
+      
+      // Check if we already processed this queue state
+      if (processedQueues.has(queueKey)) {
+        return;
+      }
+
       // Check if this is a new queue join
       const existingQueueNotification = notifications.find(
         (n) =>
@@ -258,6 +285,8 @@ export const useNotifications = () => {
           "joined"
         );
         setNotifications((prev) => [...newNotifications, ...prev]);
+        // Mark this queue state as processed
+        setProcessedQueues(prev => new Set([...prev, queueKey]));
       } else {
         // Position update
         const lastPositionNotification = notifications
@@ -275,13 +304,20 @@ export const useNotifications = () => {
             "position_updated"
           );
           setNotifications((prev) => [...newNotifications, ...prev]);
+          // Mark this queue state as processed
+          setProcessedQueues(prev => new Set([...prev, queueKey]));
         }
       }
     }
-  }, [userQueue]);
+  }, [userQueue, processedQueues, notificationsCleared]);
 
   // Listen for queue being left
   useEffect(() => {
+    // Don't generate notifications if they were manually cleared
+    if (notificationsCleared) {
+      return;
+    }
+
     const queueNotifications = notifications.filter(
       (n) => n.linkedType === "queue"
     );
@@ -293,14 +329,21 @@ export const useNotifications = () => {
       )[0];
 
       if (lastQueueNotification?.actionData) {
-        const newNotifications = generateQueueNotifications(
-          lastQueueNotification.actionData,
-          "left"
-        );
-        setNotifications((prev) => [...newNotifications, ...prev]);
+        const leftQueueKey = `left_${lastQueueNotification.linkedId}`;
+        
+        // Check if we already processed this queue leaving
+        if (!processedQueues.has(leftQueueKey)) {
+          const newNotifications = generateQueueNotifications(
+            lastQueueNotification.actionData,
+            "left"
+          );
+          setNotifications((prev) => [...newNotifications, ...prev]);
+          // Mark this queue leaving as processed
+          setProcessedQueues(prev => new Set([...prev, leftQueueKey]));
+        }
       }
     }
-  }, [userQueue === null]);
+  }, [userQueue === null, processedQueues, notificationsCleared]);
 
   const markAsRead = (notificationId) => {
     setNotifications((prev) => {
@@ -325,18 +368,45 @@ export const useNotifications = () => {
     );
   };
 
+  const clearAllNotifications = () => {
+    setNotifications([]);
+    setProcessedAppointments(new Set());
+    setProcessedQueues(new Set());
+    setNotificationsCleared(true);
+  };
+
   const addNotification = (newNotification) => {
     setNotifications((prev) => [newNotification, ...prev]);
+    setNotificationsCleared(false);
+  };
+
+  const addTestNotification = () => {
+    const testNotification = {
+      id: Math.floor(Date.now() + Math.random() * 1000),
+      type: "health_tip",
+      title: "Test Notification",
+      message: "This is a test notification to verify the system is working correctly.",
+      timestamp: new Date(),
+      read: false,
+      priority: "normal",
+    };
+    addNotification(testNotification);
+  };
+
+  const resetClearedFlag = () => {
+    setNotificationsCleared(false);
   };
 
   const triggerAppointmentNotification = (appointment, action = "created") => {
     const newNotifications = generateAppointmentNotifications(appointment, action);
     setNotifications((prev) => [...newNotifications, ...prev]);
+    setNotificationsCleared(false);
   };
 
   const triggerQueueNotification = (queue, action = "joined") => {
     const newNotifications = generateQueueNotifications(queue, action);
     setNotifications((prev) => [...newNotifications, ...prev]);
+    setNotificationsCleared(false);
   };
 
   return {
@@ -346,7 +416,10 @@ export const useNotifications = () => {
     markAsRead,
     markAllAsRead,
     deleteNotification,
+    clearAllNotifications,
     addNotification,
+    addTestNotification,
+    resetClearedFlag,
     triggerAppointmentNotification,
     triggerQueueNotification,
   };

@@ -14,7 +14,7 @@ import { useNotifications } from "../hooks/useNotifications";
 import { styles as appStyles } from "../styles/ScreenStyles";
 
 export const NotificationsScreen = ({ onNavigate, onMenuPress }) => {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications, addTestNotification, resetClearedFlag } = useNotifications();
   const [filter, setFilter] = useState("all"); // all, unread, read
 
   const filteredNotifications = notifications.filter((notification) => {
@@ -75,9 +75,7 @@ export const NotificationsScreen = ({ onNavigate, onMenuPress }) => {
           text: "Clear All",
           style: "destructive",
           onPress: () => {
-            notifications.forEach(notification => {
-              deleteNotification(notification.id);
-            });
+            clearAllNotifications();
           },
         },
       ]
@@ -147,27 +145,49 @@ export const NotificationsScreen = ({ onNavigate, onMenuPress }) => {
           </TouchableOpacity>
         </View>
 
-        {notifications.length > 0 && (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleMarkAllAsRead}
-            >
-              <Ionicons name="checkmark-done" size={16} color="#667eea" />
-              <Text style={styles.actionButtonText}>Mark All Read</Text>
-            </TouchableOpacity>
+        <View style={styles.actionButtons}>
+          {notifications.length > 0 && (
+            <>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleMarkAllAsRead}
+              >
+                <Ionicons name="checkmark-done" size={16} color="#667eea" />
+                <Text style={styles.actionButtonText}>Mark All Read</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.actionButton, styles.clearButton]}
-              onPress={handleClearAll}
-            >
-              <Ionicons name="trash-outline" size={16} color="#EF4444" />
-              <Text style={[styles.actionButtonText, styles.clearButtonText]}>
-                Clear All
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+              <TouchableOpacity
+                style={[styles.actionButton, styles.clearButton]}
+                onPress={handleClearAll}
+              >
+                <Ionicons name="trash-outline" size={16} color="#EF4444" />
+                <Text style={[styles.actionButtonText, styles.clearButtonText]}>
+                  Clear All
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+          
+          <TouchableOpacity
+            style={[styles.actionButton, styles.testButton]}
+            onPress={addTestNotification}
+          >
+            <Ionicons name="add-circle" size={16} color="#10B981" />
+            <Text style={[styles.actionButtonText, styles.testButtonText]}>
+              Add Test
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.resetButton]}
+            onPress={resetClearedFlag}
+          >
+            <Ionicons name="refresh" size={16} color="#8B5CF6" />
+            <Text style={[styles.actionButtonText, styles.resetButtonText]}>
+              Reset
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Notifications List */}
@@ -268,6 +288,18 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     color: "#EF4444",
+  },
+  testButton: {
+    backgroundColor: "#F0FDF4",
+  },
+  testButtonText: {
+    color: "#10B981",
+  },
+  resetButton: {
+    backgroundColor: "#F3F4F6",
+  },
+  resetButtonText: {
+    color: "#8B5CF6",
   },
   notificationsContainer: {
     flex: 1,
